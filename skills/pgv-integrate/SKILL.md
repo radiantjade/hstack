@@ -1,6 +1,6 @@
 ---
 name: pgv-integrate
-description: Bring work into a gated branch of a repository that uses PGV - collect the deferred checks and standing checks of that branch from GitHub issues, validate them once on the commit that will enter, repair what fails, record the gate status, then merge or push. Use when the user asks to merge, push, promote, release or open a pull request into a branch such as staging or main in a repository that uses PGV, when they ask to run the deferred or pending validations, or when GitHub rejects a merge or push because a required pgv/<branch> status is missing. Signs that a repository uses PGV are issues labeled pgv:config, pgv:deferred or pgv:standing, a required status check named pgv/<branch>, or the user saying PGV.
+description: Bring work into a gated branch of a repository that uses PGV - collect the deferred checks addressed to that branch from GitHub issues, validate them once on the commit that will enter, repair what fails, record the gate status, then merge or push. Use when the user asks to merge, push, promote, release or open a pull request into a branch such as staging or main in a repository that uses PGV, when they ask to run the deferred or pending validations, or when GitHub rejects a merge or push because a required pgv/<branch> status is missing. Signs that a repository uses PGV are issues labeled pgv:config or pgv:deferred, a required status check named pgv/<branch>, or the user saying PGV.
 ---
 
 # PGV integrate
@@ -10,10 +10,9 @@ it must prove by itself and filing the rest as deferred checks. This skill is
 where that unfinished validation is finished: once, on the commit that
 actually enters the next branch, with everything that enters together in it.
 
-This skill is one of three: `pgv-setup` records which branches exist, which
-model does which job and what each branch must guarantee, `pgv-build`
-builds one piece of work, `pgv-integrate` (this skill)
-brings what was built into a gated branch.
+This skill is one of three: `pgv-setup` records which branches exist and
+which model does which job, `pgv-build` builds one piece of work,
+`pgv-integrate` (this skill) brings what was built into a gated branch.
 
 You are **Main**: the agent the user asked. You start a **Validator** and,
 when a check fails, a **Repairer**, each in a fresh context; they never talk
@@ -41,16 +40,17 @@ Find out, without changing anything:
   source lacks, they are merged into the source first (step 3), and the
   result is what gets validated. GitHub can only hold a status for a commit
   it has, so the source is pushed before validation.
-- **What must pass.** Every open standing check `to:<target>` and every open
-  deferred check `to:<target>`. Read their bodies in full.
+- **What must pass.** Every open deferred check `to:<target>`. Read their
+  bodies in full. If there is none, nothing was left for this branch: the
+  gate status can be written as `success` with that said, and you go to
+  step 6.
 - **What is already known.** The gate status on that commit, if any. If it is
   already `success`, skip to step 6.
 
 Then put the checks in order. Deferred checks that ask for the same thing
 (three build runs each deferring the full regression suite) become one item
 to run, with every issue that asked for it listed under it and their notes
-on "what an existing check will see differently" gathered together. A
-standing check and a deferred check that name the same suite are one run too.
+on "what an existing check will see differently" gathered together.
 
 ## 2. Say what will happen and ask
 
@@ -64,10 +64,9 @@ Before anything runs, tell the user in their language, briefly:
   from the report and validate again, unless they prefer to hand the report
   to the session that did the work, or to stop and look.
 
-Use plain words. Standing check, deferred check and gate status are this
-skill's own terms and the user has not read this file: say "the tests that
-run every time something goes into staging", "the validation that was left
-for this moment", "the mark that this commit passed". Show the list as a
+Use plain words. Deferred check and gate status are this skill's own terms
+and the user has not read this file: say "the validation that was left for
+this moment", "the mark that this commit passed". Show the list as a
 table, and keep the question itself to one short sentence.
 
 Then ask whether to proceed. Start nothing before the answer. If the user
@@ -101,13 +100,12 @@ GitHub ([references/records.md](references/records.md)):
 
 - on each issue, a result comment for that issue;
 - each deferred check that passed: closed;
-- standing checks stay open;
 - the gate status on the commit: `success` only when every item passed or was
   waived by the user; otherwise `failure`.
 
 The gate status is what lets the commit in, so it is the one thing you must
 not write on trust. Post `success` only from a report that accounts for every
-open standing and deferred check of the target at that exact commit.
+open deferred check of the target at that exact commit.
 
 ## 5. Repair, then validate again
 
@@ -142,7 +140,7 @@ why (the status is on another commit, the branch moved, another rule applies)
 and return to the step that fixes it.
 
 Report in the user's language: what entered and at which commit, which
-deferred checks were closed, which standing checks ran, what was waived, what
+deferred checks were closed, what was waived, what
 was repaired on the way and by which commits, and anything the user should
 look at. If something could not be validated, say exactly what and why; do
 not round it up.
@@ -157,5 +155,5 @@ not round it up.
   machines. Write them so that a reader with nothing else can act. Never
   write session identifiers, local paths, host names or secrets into them:
   they are as visible as the repository.
-- Only the user removes a requirement: waiving a check, closing or editing a
-  standing check, changing which branches are gated.
+- Only the user removes a requirement: waiving a check, changing which
+  branches are gated.

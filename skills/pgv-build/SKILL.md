@@ -10,9 +10,8 @@ implementation, review for blocking defects and unnecessary work, then
 implement and independently verify the agreed result.
 
 This skill is one of three. `pgv-setup` records, once for a repository, which
-branches exist, which model does which job, and what each branch must
-guarantee. `pgv-build` (this skill) builds one piece of
-work and validates what that work itself must prove.
+branches exist and which model does which job. `pgv-build` (this skill)
+builds one piece of work and validates what that work itself must prove.
 `pgv-integrate` collects the validation that build runs left for a branch,
 runs it once on the combined result, and brings the result into the branch.
 
@@ -54,10 +53,9 @@ A run that validates as if its work went to production alone repeats, for
 every piece of work, the checks that only mean something once the pieces are
 together. So decide, before the contract is shown, where each check belongs.
 
-Read the repository's PGV configuration, the standing checks of the gated
-branches above the entry branch, and the deferred checks already open
-([references/records.md](references/records.md)). If no branch above the entry
-branch is gated, every check belongs to this run.
+Read the repository's PGV configuration and the deferred checks already
+open ([references/records.md](references/records.md)). If no branch above the
+entry branch is gated, every check belongs to this run.
 
 Give every done state and every required regression check one place:
 
@@ -65,8 +63,8 @@ Give every done state and every required regression check one place:
   branch requires. Evidence from this run's own tree settles it, and a
   failure points at this work.
 - **Deferred to `<branch>`**: a claim about the product as a whole once other
-  work is combined with this one, such as a full regression suite, a
-  comparison against the branch, or a standing check of that branch.
+  work is combined with this one, such as a full regression suite or a
+  comparison against the branch.
 
 The test is one question: *if this passes on this run's tree, must it be run
 again anyway when the work is combined with other work or the branch moves?*
@@ -74,14 +72,12 @@ If yes, running it here pays for it twice; defer it. Cost alone is not a
 reason to defer: a slow check of what this work itself claims stays in the
 run.
 
-A standing check of a higher branch is not copied into the done states. Note
-instead what this work makes that check observe differently (a renamed
-command, new output, a known change of timing), because the agent that runs
-it later has never seen this work.
+If an open deferred check already asks for the same thing (another build
+deferred the same suite), defer it again all the same: `pgv-integrate` runs
+the two as one, and needs this work's own notes on what it changed.
 
 Show the split in the contract, each done state marked `in this run` or
-`deferred to <branch>`, with the standing checks that will cover this work at
-integration listed beneath. Deferral is the default. The user may move any
+`deferred to <branch>`. Deferral is the default. The user may move any
 deferred item into this run; it is then validated here and no deferred check
 is filed for it. When you explain the split, use plain words in the user's
 language ("validated now" and "validated later, when this goes into

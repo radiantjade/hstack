@@ -18,7 +18,6 @@ Use the `gh` CLI. In `gh api` paths, write `{owner}` and `{repo}` literally:
 | Record | What it is | How to find it |
 |---|---|---|
 | Configuration | One open issue. Its body lists the branches in order and says which are gated. | label `pgv:config` |
-| Standing check | An open issue. A test that must pass every time something enters a branch. It stays open. | labels `pgv:standing` and `to:<branch>` |
 | Deferred check | An issue. Validation that a build run left for a later branch. It is closed when it passes. | labels `pgv:deferred` and `to:<branch>` |
 | Gate status | A commit status on one commit. | context `pgv/<branch>` |
 | Ruleset | A GitHub ruleset on a gated branch that requires the gate status. | name `pgv: <branch>` |
@@ -32,9 +31,9 @@ Use the `gh` CLI. In `gh api` paths, write `{owner}` and `{repo}` literally:
   carries the gate status `pgv/<branch>` with state `success`. The ruleset makes
   GitHub enforce it for merges and pushes.
 - **Gate status `success` on commit C for branch B** means: at C, every
-  standing check `to:B` passed, and every deferred check `to:B` that was open
-  either passed and was closed, or was waived by the user. The status belongs
-  to that exact commit. A new commit has no status and must be validated.
+  deferred check `to:B` that was open either passed and was closed, or was
+  waived by the user. The status belongs to that exact commit. A new commit
+  has no status and must be validated.
 - **`to:<branch>`** on an issue means: this must pass before a change enters
   `<branch>`. A deferred check is addressed to the nearest gated branch above
   the entry branch unless it needs something only a higher branch has.
@@ -77,32 +76,6 @@ must approve an integration into which branch, anything else>
 `pgv-setup` always writes all four roles, with the default where the user
 kept it, so that this issue says what runs in this repository.
 
-## Standing check issue
-
-Title: `Standing check: <name>`. Labels: `pgv:standing`, `to:<branch>` (one
-`to:` label for each branch that requires it).
-
-```markdown
-## What must hold
-
-<the guarantee, in one or two sentences>
-
-## How to check
-
-<a command to run, or a procedure that an agent follows step by step; the
-environment it needs; how long it takes>
-
-## Passes when
-
-<the exact value or observation>
-```
-
-Standing checks are made in the last part of `pgv-setup`, which reads the product,
-settles with the user what each branch must guarantee, and tries each check
-once before it is filed. A standing check is edited when the product changes
-and closed when it no longer means anything. Only the user decides either;
-an agent proposes.
-
 ## Deferred check issue
 
 Title: `Deferred check: <what must be shown>`. Labels: `pgv:deferred`,
@@ -124,7 +97,7 @@ work.>
 Commits: <first>..<last> on <branch> (or: branch <name> at <commit>)
 Areas changed: <components, commands, formats>
 What an existing check will see differently: <renamed commands, new output,
-changed timings, anything a standing check would otherwise report as a failure>
+changed timings, anything an existing check would otherwise report as a failure>
 
 ## Already established
 
@@ -155,8 +128,7 @@ Suspected cause: <for FAIL only: commit or area, if the evidence points at one>
 # Configuration (expect exactly one)
 gh issue list --label pgv:config --state open --json number,title,body
 
-# Standing and deferred checks for a branch
-gh issue list --label pgv:standing --label "to:staging" --state open --json number,title,body --limit 200
+# Deferred checks for a branch
 gh issue list --label pgv:deferred --label "to:staging" --state open --json number,title,body --limit 200
 
 # File a deferred check
@@ -168,7 +140,7 @@ gh issue close <number> --comment "Passed at <commit> for staging."
 
 # Gate status: read, write
 gh api "repos/{owner}/{repo}/commits/<commit>/status" --jq '.statuses[] | select(.context=="pgv/staging") | .state'
-gh api "repos/{owner}/{repo}/statuses/<commit>" -f state=success -f context=pgv/staging -f description="<n> standing, <m> deferred checks passed"
+gh api "repos/{owner}/{repo}/statuses/<commit>" -f state=success -f context=pgv/staging -f description="<n> deferred checks passed"
 
 # What GitHub enforces on a branch
 gh api "repos/{owner}/{repo}/rules/branches/staging"

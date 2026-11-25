@@ -12,7 +12,6 @@ Done states:
   S1: <state> | measured by: <quantification> | verified by: <method> -> <expected value/observation> | where: in this run
   S2: <state> | measured by: ... | verified by: ... | where: deferred to <branch>
   ...
-Standing checks that will cover this work at integration: <issue numbers and names, or none>
 Constraints and scope boundaries: <user and applicable repository instructions>
 Goal approval: <user's explicit approval, quoted or referenced, with date>
 Decision policy: <selected option or equivalent explicit user instruction>
@@ -22,7 +21,7 @@ Policy source: <user selection/instruction, quoted or referenced>
 
 `where` is `in this run` or `deferred to <branch>`, decided under Stage 0's
 validation scope. When no branch above the entry branch is gated, every state
-is `in this run` and the line of standing checks is left out.
+is `in this run`.
 
 Embed this record verbatim in the plan. Separate execution methods from the
 approved conditions they serve. For necessary regression or repository checks,

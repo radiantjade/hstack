@@ -37,7 +37,7 @@ every delegated role; do not inherit a different host default silently.
 | Planner | Same as Main | Same as Main | Host session; read-only product code, may write plan |
 | Plan Reviewer | Other family from Planner (below) | `xhigh` | Fresh context; read-only product code, may write review |
 | Generator | Claude Opus 5.5 (`claude-opus-5-5`) | `medium` | `claude -p`, fresh context; writable scope from packet |
-| Validator | `gpt-6-astra` | `xhigh` | `codex exec`, or a new Codex desktop app thread when the round needs computer use or browser use (below); fresh context; read-only product code, may write validation report |
+| Validator | `gpt-6.2-astra` | `xhigh` | `codex exec`, or a new Codex desktop app thread when the round needs computer use or browser use (below); fresh context; read-only product code, may write validation report |
 
 **Main and Planner keep the host session as it is.** They run in the session
 the user invoked the skill from, with that session's model and effort. Record
@@ -49,12 +49,12 @@ the one above, and the agent that repairs a failed check takes the Generator
 assignment. There is no Planner and no Plan Reviewer.
 
 **Plan Reviewer is the other family from Planner.**
-- Planner is a Claude model → Plan Reviewer is `gpt-6-astra`, `xhigh`, via
+- Planner is a Claude model → Plan Reviewer is `gpt-6.2-astra`, `xhigh`, via
   `codex exec`.
 - Planner is a GPT model → Plan Reviewer is Claude Fable 5.2
   (`claude-fable-5-2`), `xhigh`, via `claude -p`.
 
-**Validator is fixed** to `gpt-6-astra` at `xhigh` in a fresh turn,
+**Validator is fixed** to `gpt-6.2-astra` at `xhigh` in a fresh turn,
 whichever host runs Main. When a done state or required existing behavior
 needs a user-visible end-to-end check on this computer (an app window, a
 browser flow, what a user would see or click), Validator actively uses Codex
@@ -120,10 +120,10 @@ fallbacks: none
   - Claude Plan Reviewer: a fresh `claude -p --model claude-fable-5-2
     --effort xhigh` invocation per turn.
   - GPT Plan Reviewer and every Validator turn without computer/browser-use
-    checks: a fresh `codex exec -m gpt-6-astra -c
+    checks: a fresh `codex exec -m gpt-6.2-astra -c
     model_reasoning_effort="xhigh"` invocation.
   - Validator turns that need computer use or browser use: a new Codex
-    desktop app thread with `gpt-6-astra` at `xhigh` (see "Validator backend
+    desktop app thread with `gpt-6.2-astra` at `xhigh` (see "Validator backend
     for each round").
 - **Unavailable assignment:** if the selected model, effort, or required
   isolation is unavailable, stop and report; never silently substitute.

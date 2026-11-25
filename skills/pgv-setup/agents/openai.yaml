@@ -1,6 +1,6 @@
 interface:
   display_name: "PGV setup"
-  short_description: "Record a repository's branches and what each one guarantees"
+  short_description: "Record a repository's branches and which model does which job"
   default_prompt: "Use $pgv-setup to set up PGV for this repository."
 policy:
   allow_implicit_invocation: true
