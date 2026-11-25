@@ -1,64 +1,71 @@
-# PGV records on GitHub
+# PGV records
 
 This file is the same in `pgv-setup`, `pgv-build` and
 `pgv-integrate`. Its
 source is `shared/pgv/records.md`; `tools/sync-pgv-shared.sh` copies it.
 
-The three skills keep everything they need to remember on GitHub, as issues,
-labels, commit statuses and rulesets. Nothing goes into the repository's files
-or history: the product branches hold product code only, a check that has
-passed leaves no file to delete, and everyone who can open the repository sees
-the same records from any machine.
+The three skills keep what they need to remember as files beside the plans.
+They need Git and nothing else: no host such as GitHub, no issue, label,
+commit status or branch rule. A pull request, where one is used, is opened by
+the user's usual way for work that was already validated; it is not a record
+of these skills.
 
-Use the `gh` CLI. In `gh api` paths, write `{owner}` and `{repo}` literally:
-`gh` fills them in from the current repository.
+## Where the files are
 
-## What exists
+**The plans folder** is where this repository's plans are kept: `docs/plans/`
+unless the repository's own instructions name another place. It may be inside
+the repository or outside it (some projects keep their plans in a separate
+folder for several repositories).
 
-| Record | What it is | How to find it |
+| Record | File | Written by |
 |---|---|---|
-| Configuration | One open issue. Its body lists the branches in order and says which are gated. | label `pgv:config` |
-| Deferred check | An issue. Validation that a build run left for a later branch. It is closed when it passes. | labels `pgv:deferred` and `to:<branch>` |
-| Gate status | A commit status on one commit. | context `pgv/<branch>` |
-| Ruleset | A GitHub ruleset on a gated branch that requires the gate status. | name `pgv: <branch>` |
+| Models | `pgv.md` in the plans folder. Optional: without it the defaults of `model-routing.md` are in force. | `pgv-setup` |
+| Deferred checks | `<plan-slug>-deferred.md` beside the plan of the work. One file for one build, with all the checks that build left. | `pgv-build` |
+| Entry record | `<date>-entry-<target>.md` in the plans folder. One for each entry of work into a target. | `pgv-integrate` |
+| Validation reports | `<plan-slug>-validation-r<N>.md` beside the plan; `<entry-slug>-validation-r<N>.md` beside the entry record. | Validator |
+
+Commit these files the way the repository commits its plans. They are plan
+documents: a change of one of them (a status line, a result) does not change
+the product, so it does not make a validated commit unvalidated.
+
+Where the plans folder is inside a repository that others can read, write
+nothing private into these files: no session or thread identifier, no local
+path, host name, key or address.
 
 ## What the records mean
 
-- **Branch order.** The configuration lists branches lowest first, for example
-  `dev`, `staging`, `main`. Work enters the first branch (the entry branch) and
-  is integrated upward one branch at a time.
-- **Gated branch.** A branch that accepts a commit only when that commit
-  carries the gate status `pgv/<branch>` with state `success`. The ruleset makes
-  GitHub enforce it for merges and pushes.
-- **Gate status `success` on commit C for branch B** means: at C, every
-  deferred check `to:B` that was open either passed and was closed, or was
-  waived by the user. The status belongs to that exact commit. A new commit
-  has no status and must be validated.
-- **`to:<branch>`** on an issue means: this must pass before a change enters
-  `<branch>`. A deferred check is addressed to the nearest gated branch above
-  the entry branch unless it needs something only a higher branch has.
-- **No configuration issue** means the repository is not set up: neither the
-  branches nor the models of the roles are decided. `pgv-build` and
-  `pgv-integrate` do not run; they tell the user to run `pgv-setup` first.
+- **Work.** What one `pgv-build` run made: a branch, at a commit.
+- **Target.** What work enters through `pgv-integrate`: a branch, or
+  `release` (a tag that is about to be put on a commit). The skills do not
+  fix which branches a repository has or in what order work moves through
+  them. The target of an entry is what the user names.
+- **Deferred check.** Validation that a build did not run, because it would
+  have to be run again anyway once the work is combined with other work. It
+  names the target it is addressed to: the work must not enter that target
+  before the check has passed there.
+- **An entry.** One or several works that enter a target together. They are
+  merged onto the present tip of the target; that merged commit is the
+  **candidate**; the deferred checks of those works are validated once on
+  the candidate; the target is then moved to exactly that commit.
+- **Which deferred checks an entry runs.** Those with `Status: open` and
+  `To:` this target, in the deferred files of the works that enter: the
+  files whose `Work` line names a branch the user gave, or a commit that the
+  candidate contains and the target does not
+  (`git merge-base --is-ancestor <commit> <ref>`). The second part finds
+  work that came in through another branch.
+- **One commit, one result.** A result holds for the exact commit it was
+  observed on. Anything that makes a new commit of product code (a repair, a
+  merge, a rebase) has no result yet.
+- **One entry into a target at a time.** An entry record with
+  `Status: in progress` says that an entry into that target is running. A
+  second one is not started while it is there.
 
-## Configuration issue
-
-Title: `PGV configuration`. Label: `pgv:config`. Exactly one is open.
+## Models: `pgv.md`
 
 ```markdown
-## Branches
+# PGV models
 
-Lowest first. Work enters the first branch.
-
-| Branch | Gated | Gate status |
-|---|---|---|
-| dev | no | - |
-| staging | yes | pgv/staging |
-| main | yes | pgv/main |
-
-## Models
-
-Which model runs which role in this repository.
+Which model runs which role here.
 
 | Role | Model | Effort | Backend |
 |---|---|---|---|
@@ -69,82 +76,95 @@ Which model runs which role in this repository.
 
 ## Notes
 
-<what the user said about how integration should run: where tests run, who
-must approve an integration into which branch, anything else>
+<what the user said about how PGV should run here: where tests run, who must
+approve an entry into which branch, anything else>
 ```
 
-`pgv-setup` always writes all four roles, with the default where the user
-kept it, so that this issue says what runs in this repository.
+`pgv-setup` writes all four roles, with the default where the user kept it,
+so that the file says what runs.
 
-## Deferred check issue
-
-Title: `Deferred check: <what must be shown>`. Labels: `pgv:deferred`,
-`to:<branch>`.
+## Deferred checks: `<plan-slug>-deferred.md`
 
 ```markdown
-## Claim
+# Deferred checks: <the work, in a few words>
 
-<what must be true; the done state or the regression check that was deferred>
-
-## How to check
-
-<method and the exact value or observation that counts as a pass; the
-environment it needs. Complete enough for an agent that has never seen the
-work.>
-
-## The work
-
-Commits: <first>..<last> on <branch> (or: branch <name> at <commit>)
+Plan: <file name of the plan>
+Work: branch `<name>` at `<commit>`, taken from `<branch>` at `<commit>`
 Areas changed: <components, commands, formats>
 What an existing check will see differently: <renamed commands, new output,
 changed timings, anything an existing check would otherwise report as a failure>
 
-## Already established
+## D1: <what must be shown>
 
-<what the build run's own validation observed; known failures that exist
-without this work; baselines measured>
+To: `<branch>` | `release`
+Status: open
+
+Claim: <what must be true; the done state or the regression check that was
+deferred>
+
+How to check: <method and the exact value or observation that counts as a
+pass; the environment it needs. Complete enough for an agent that has never
+seen the work.>
+
+Already established: <what the build's own validation observed; known
+failures that exist without this work; baselines measured>
+
+## D2: ...
 ```
 
-Identify the work by commits. Do not write session or thread identifiers,
-local paths, host names, keys or anything else private: an issue is visible to
-everyone who can see the repository.
+`Status` is one of:
 
-## Result comment
+- `open`
+- `passed at <commit> for <target> (<entry record>)`
+- `waived by the user on <date>: <why>`
 
-Written on an issue after a validation round.
+Only `pgv-integrate` changes a status, and only after the entry.
+
+## Entry record: `<date>-entry-<target>.md`
 
 ```markdown
-**<PASS | FAIL | UNVERIFIED>** at <commit> for `<branch>`
+# Entry into `<target>`, <date>
 
-Checked: <what was run or inspected>
-Observed: <the value or observation; for FAIL, expected and observed>
-Evidence: <the lines of output that show it>
-Suspected cause: <for FAIL only: commit or area, if the evidence points at one>
+Status: in progress | entered at <commit> | stopped: <why>
+Target: `<target>` at `<commit>` when the entry started
+Works: <for each: branch at commit; its deferred file>
+Candidate: <r1: commit, FAIL> <r2: commit, PASS> ...
+
+## Items
+
+| Item | Asked by | Result |
+|---|---|---|
+| I1: <what was run, once> | <deferred file> D1, <deferred file> D3 | PASS at <commit> |
+
+## Taken out
+
+<a work that left this entry: which, why, the report that shows it>
+
+## Waived
+
+<a check the user left out: which, when, why>
+
+## Repairs
+
+<commits made on the way, and what each repaired>
 ```
 
 ## Commands
 
 ```bash
-# Configuration (expect exactly one)
-gh issue list --label pgv:config --state open --json number,title,body
+# Deferred files that still have an open check
+grep -l '^Status: open' <plans folder>/*-deferred.md
 
-# Deferred checks for a branch
-gh issue list --label pgv:deferred --label "to:staging" --state open --json number,title,body --limit 200
+# Is the work of a deferred file in the candidate and not yet in the target?
+git merge-base --is-ancestor <work commit> <candidate> && ! git merge-base --is-ancestor <work commit> <target>
 
-# File a deferred check
-gh issue create --title "Deferred check: ..." --label pgv:deferred --label "to:staging" --body-file <file>
+# An entry into this target that is still running
+grep -l '^Status: in progress' <plans folder>/*-entry-<target>.md
 
-# Record a result, close a deferred check that passed
-gh issue comment <number> --body-file <file>
-gh issue close <number> --comment "Passed at <commit> for staging."
+# The candidate: the works merged onto the present tip of the target
+git switch -c pgv-entry-<target> <target>
+git merge --no-ff <work branch>        # once for each work that enters
 
-# Gate status: read, write
-gh api "repos/{owner}/{repo}/commits/<commit>/status" --jq '.statuses[] | select(.context=="pgv/staging") | .state'
-gh api "repos/{owner}/{repo}/statuses/<commit>" -f state=success -f context=pgv/staging -f description="<n> deferred checks passed"
-
-# What GitHub enforces on a branch
-gh api "repos/{owner}/{repo}/rules/branches/staging"
+# Move the target to the validated candidate, and nothing else
+git switch <target> && git merge --ff-only pgv-entry-<target>
 ```
-
-A commit status can be written only for a commit that GitHub has, so push the
-branch first. `state` is one of `success`, `failure`, `pending`, `error`.

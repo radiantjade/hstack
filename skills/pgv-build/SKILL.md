@@ -1,6 +1,6 @@
 ---
 name: pgv-build
-description: Build one piece of software-engineering work by plan, generate, validate - a user-approved goal and decision policy, an implementation-ready plan with cross-model review, scoped generation, and independent validation of what this work itself must prove, with the validation that belongs to a later branch filed as deferred checks for pgv-integrate. Use only when the user asks to run pgv-build (/pgv-build or $pgv-build), PGV, or the Plan-Generate-Validate loop. Discussing or editing this skill does not invoke the workflow.
+description: Build one piece of software-engineering work by plan, generate, validate - a user-approved goal and decision policy, an implementation-ready plan with cross-model review, scoped generation, and independent validation of what this work itself must prove, with the validation that only means something once the work is combined with other work left as deferred checks for pgv-integrate. Use only when the user asks to run pgv-build (/pgv-build or $pgv-build), PGV, or the Plan-Generate-Validate loop. Discussing or editing this skill does not invoke the workflow.
 ---
 
 # PGV build
@@ -9,11 +9,11 @@ Agree on the user's outcome and decision authority, plan enough to begin
 implementation, review for blocking defects and unnecessary work, then
 implement and independently verify the agreed result.
 
-This skill is one of three. `pgv-setup` records, once for a repository, which
-branches exist and which model does which job. `pgv-build` (this skill)
-builds one piece of work and validates what that work itself must prove.
-`pgv-integrate` collects the validation that build runs left for a branch,
-runs it once on the combined result, and brings the result into the branch.
+This skill is one of three. `pgv-setup` records which model does which job.
+`pgv-build` (this skill) builds one piece of work and validates what that
+work itself must prove. `pgv-integrate` takes the works that enter a branch
+together, one or several, runs once on the merged result the validation
+their builds left, and brings the result into the branch.
 
 Roles: **Main**, **Planner**, **Plan Reviewer**,
 **Generator**, **Validator**. Before assigning roles, read
@@ -22,16 +22,14 @@ routing manifest. Before delegating, read
 [references/review-protocol.md](references/review-protocol.md) for packets
 and evidence formats. Concrete model assignments live only in model routing.
 Before drafting the goal, read [references/records.md](references/records.md)
-for where the repository's branch rules and deferred checks are kept.
+for where the models and the deferred checks are kept.
 
-## Before Stage 0 — the repository must be set up
+## Before Stage 0 — the models
 
-Look for the repository's PGV configuration: the open issue labeled
-`pgv:config` ([references/records.md](references/records.md)). If there is
-none, stop here. PGV has not been set up for this repository, so neither the
-branches nor the models of the roles are decided. Tell the user to run
-`pgv-setup` first and offer to start it now. Do not draft a goal, and do not
-fall back to defaults.
+Read `pgv.md` in the plans folder
+([references/records.md](references/records.md)). If it exists, its
+assignment is in force. If it does not, the defaults of the routing
+reference are in force: nothing has to be set up before a build.
 
 ## Stage 0 — Goal and decision policy (hard gate)
 
@@ -47,24 +45,20 @@ The contract contains four propositions:
 4. **Verification** — the method for each state and the exact value or
    observation that counts as done.
 
-### Validation scope: this run or a later branch
+### Validation scope: this run or the entry
 
 A run that validates as if its work went to production alone repeats, for
 every piece of work, the checks that only mean something once the pieces are
 together. So decide, before the contract is shown, where each check belongs.
 
-Read the repository's PGV configuration and the deferred checks already
-open ([references/records.md](references/records.md)). If no branch above the
-entry branch is gated, every check belongs to this run.
-
 Give every done state and every required regression check one place:
 
-- **In this run**: what this work itself makes true, and whatever the entry
-  branch requires. Evidence from this run's own tree settles it, and a
-  failure points at this work.
-- **Deferred to `<branch>`**: a claim about the product as a whole once other
-  work is combined with this one, such as a full regression suite or a
-  comparison against the branch.
+- **In this run**: what this work itself makes true. Evidence from this
+  run's own tree settles it, and a failure points at this work.
+- **Deferred**: a claim about the product as a whole, which other work can
+  change: a full regression suite, the use cases walked from start to
+  finish, a comparison against the branch. `pgv-integrate` validates it when
+  the work enters a branch, once for everything that enters together.
 
 The test is one question: *if this passes on this run's tree, must it be run
 again anyway when the work is combined with other work or the branch moves?*
@@ -72,16 +66,26 @@ If yes, running it here pays for it twice; defer it. Cost alone is not a
 reason to defer: a slow check of what this work itself claims stays in the
 run.
 
-If an open deferred check already asks for the same thing (another build
-deferred the same suite), defer it again all the same: `pgv-integrate` runs
-the two as one, and needs this work's own notes on what it changed.
+The answer does not depend on what other work exists. Do not look for what
+other builds deferred, and do not try to find out whether a check overlaps
+with theirs: defer what the question says to defer. `pgv-integrate` reads
+the deferred checks of everything that enters together and runs what several
+of them ask for once. A work that enters alone has the same checks run for
+it alone.
+
+A deferred check names the target it is addressed to: the branch this work
+will enter, which is the branch it was taken from unless the user says
+otherwise. Address a check to a later target (another branch, or `release`)
+only when it needs something that exists only there, such as an environment
+that is brought up for a release.
 
 Show the split in the contract, each done state marked `in this run` or
-`deferred to <branch>`. Deferral is the default. The user may move any
-deferred item into this run; it is then validated here and no deferred check
-is filed for it. When you explain the split, use plain words in the user's
-language ("validated now" and "validated later, when this goes into
-staging"), not this skill's terms.
+`deferred to <target>`. The user may move any deferred item into this run;
+it is then validated here and no deferred check is written for it. If the
+user says that this work will not go through `pgv-integrate`, everything
+belongs to this run. When you explain the split, use plain words in the
+user's language ("validated now" and "validated later, when this is merged
+into main"), not this skill's terms.
 
 ### Approval and decision policy
 
@@ -208,9 +212,9 @@ result and repository requirements. Reuse Generator evidence when still valid
 for the assembled tree; rerun when changes or gaps invalidate it. Make small
 corrections directly; return meaningful rewrites to Generator.
 
-Draft one deferred check for each deferred item, in the format of
-[references/records.md](references/records.md), from the plan and from what
-Generator actually changed. Do not file them yet.
+Draft the deferred file, with one deferred check for each deferred item, in
+the format of [references/records.md](references/records.md), from the plan
+and from what Generator actually changed. It is finished in Stage 8.
 
 ## Stage 6 — Validate (batch)
 
@@ -263,22 +267,22 @@ cycles**. At the cap, stop and report remaining defects, evidence, and options.
 
 Complete when every done state and required regression/repository check that
 belongs to this run has valid passing evidence, every deferred item is
-`DEFERRED` and filed, no confirmed in-scope defect remains, and the final
-diff respects scope and user work.
+`DEFERRED` and written into the deferred file, no confirmed in-scope defect
+remains, and the final diff respects scope and user work.
 Only the user may accept reduced scope after seeing what is unverified.
 
-File each deferred check as an issue
+Write the deferred file beside the plan
 ([references/records.md](references/records.md)), with Validator's
-observations added and the work identified by its commits. A deferred check
-is this run's unfinished validation, handed on with everything needed to
-finish it: the work cannot enter the branch it is addressed to until the
-check passes there, and `pgv-integrate` is what runs it. If the issues cannot
-be filed (GitHub cannot be reached), say so and give the user the
-drafts; do not report the deferred items as validated.
+observations added and the work identified by its branch and commit. A
+deferred check is this run's unfinished validation, handed on with everything
+needed to finish it: the work must not enter the target it is addressed to
+until the check passes there, and `pgv-integrate` is what runs it. Do not
+report the deferred items as validated.
 
 Report the outcome against the goal and compact evidence: changed files,
 checks and results, plan version, turn IDs, and limitations. List the
-deferred checks with their issue numbers and the branch each is addressed to.
+deferred checks with the path of the deferred file and the target each is
+addressed to, and say that `pgv-integrate` runs them when the work enters.
 Separately list **unexpected decisions made under delegation**, with reasons
 and effects; reference the plan for detail rather than repeating routine work.
 

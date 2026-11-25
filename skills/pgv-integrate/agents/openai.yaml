@@ -1,6 +1,6 @@
 interface:
   display_name: "PGV integrate"
-  short_description: "Validate what was deferred and bring work into a gated branch"
+  short_description: "Validate what the builds left and bring the work into a branch"
   default_prompt: "Use $pgv-integrate to validate the deferred checks and bring this work into the branch."
 policy:
   allow_implicit_invocation: true

@@ -7,17 +7,18 @@ Agent skills for Claude Code and Codex.
 Three skills that work as a set. While features are built, validation that
 overlaps between them is not repeated for each one: a build validates what
 its own work must prove and leaves the rest, and what was left is validated
-once, when the work is merged into a branch.
+once, on the merged commit, when the work enters a branch.
 
 | Skill | When | What it does |
 |---|---|---|
-| `pgv-setup` | Once for a repository, and to change it | Records the branches, their order and which model does which job |
-| `pgv-build` | To build one piece of work | Plan, generate, validate; files the validation that belongs to a later branch as deferred checks |
-| `pgv-integrate` | To bring work into a gated branch | Collects the deferred checks, validates once, repairs what fails, merges |
+| `pgv-build` | To build one piece of work | Plan, generate, validate; leaves the validation that only means something on the merged result as deferred checks |
+| `pgv-integrate` | To bring one work or several into a branch | Merges them onto the target, validates the deferred checks once, repairs or takes out what fails, moves the target to that commit |
+| `pgv-setup` | Only to use other models than the defaults | Writes which model does which job |
 
-The records are GitHub issues, labels, commit statuses and rulesets. Nothing
-is written into the files or the history of the repository the skills work
-on. `skills/pgv-setup/references/records.md` describes them.
+The records are files beside the repository's plans. The skills need Git and
+nothing else: no host such as GitHub, no issue, label, commit status or
+branch rule, and they do not fix how a repository arranges its branches.
+`skills/pgv-build/references/records.md` describes the files.
 
 ## Layout
 
@@ -40,5 +41,3 @@ for s in pgv-setup pgv-build pgv-integrate; do
   ln -s "$PWD/skills/$s" ~/.agents/skills/$s     # Codex
 done
 ```
-
-The skills need the `gh` CLI, signed in with write access to the repository.

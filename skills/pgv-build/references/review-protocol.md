@@ -10,7 +10,7 @@ Models come from `model-routing.md`.
 Desired outcome: <1-2 sentences>
 Done states:
   S1: <state> | measured by: <quantification> | verified by: <method> -> <expected value/observation> | where: in this run
-  S2: <state> | measured by: ... | verified by: ... | where: deferred to <branch>
+  S2: <state> | measured by: ... | verified by: ... | where: deferred to <target>
   ...
 Constraints and scope boundaries: <user and applicable repository instructions>
 Goal approval: <user's explicit approval, quoted or referenced, with date>
@@ -19,9 +19,9 @@ Policy qualifications: <user-specified limits, if any>
 Policy source: <user selection/instruction, quoted or referenced>
 ```
 
-`where` is `in this run` or `deferred to <branch>`, decided under Stage 0's
-validation scope. When no branch above the entry branch is gated, every state
-is `in this run`.
+`where` is `in this run` or `deferred to <target>`, decided under Stage 0's
+validation scope. When the user said that the work will not go through
+`pgv-integrate`, every state is `in this run`.
 
 Embed this record verbatim in the plan. Separate execution methods from the
 approved conditions they serve. For necessary regression or repository checks,
@@ -119,8 +119,8 @@ Tie results to the checked code state (revision and relevant working-tree
 changes) so later roles can judge validity. Remove secrets and exclude
 Generator confidence statements from Validator inputs.
 
-Add one drafted deferred check for each deferred item, in the format of
-`records.md` ("Deferred check issue"), written from the plan and from what
+Add the drafted deferred file, with one deferred check for each deferred
+item, in the format of `records.md`, written from the plan and from what
 Generator actually changed.
 
 ## Validator packet
@@ -160,7 +160,7 @@ Overall verdict: PASS | FAIL | BLOCKED
 `PASS`: all criteria that belong to this run have valid passing evidence,
 every deferred item is `DEFERRED` with a draft that can be carried out, and
 no in-scope defect remains. `DEFERRED` is given only to an item that the
-approved record marks `deferred to <branch>`; Validator does not run its
+approved record marks `deferred to <target>`; Validator does not run its
 check and does not defer anything else. `FAIL`: a supported in-scope defect exists. `BLOCKED`:
 required evidence is unavailable without an established defect. Keep
 per-criterion `UNVERIFIED` entries even when another defect makes the overall

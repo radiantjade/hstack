@@ -21,12 +21,12 @@ checkout, so a single edit applies to both.
 
 ## Default assignment
 
-The assignment in force is the one in the repository's configuration issue
-(the "Models" section that `pgv-setup` writes; see `records.md`). Read that
-section before recording the manifest, and follow it unless the user
-explicitly overrides a role for this run. The table below is what `pgv-setup`
-proposes to the user, and what a role takes if that section does not list
-it. Whatever the assignment, it sets only the model, the effort and the
+The assignment in force is the one in the repository's `pgv.md` (the file
+that `pgv-setup` writes in the plans folder; see `records.md`). Read it
+before recording the manifest, and follow it unless the user explicitly
+overrides a role for this run. The table below is what `pgv-setup` proposes
+to the user, and what is in force when there is no `pgv.md` or it does not
+list a role. Whatever the assignment, it sets only the model, the effort and the
 backend: the rules below hold for any of them. Pin both the model and
 reasoning effort of
 every delegated role; do not inherit a different host default silently.

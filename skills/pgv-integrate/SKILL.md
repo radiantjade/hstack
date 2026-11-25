@@ -1,159 +1,197 @@
 ---
 name: pgv-integrate
-description: Bring work into a gated branch of a repository that uses PGV - collect the deferred checks addressed to that branch from GitHub issues, validate them once on the commit that will enter, repair what fails, record the gate status, then merge or push. Use when the user asks to merge, push, promote, release or open a pull request into a branch such as staging or main in a repository that uses PGV, when they ask to run the deferred or pending validations, or when GitHub rejects a merge or push because a required pgv/<branch> status is missing. Signs that a repository uses PGV are issues labeled pgv:config or pgv:deferred, a required status check named pgv/<branch>, or the user saying PGV.
+description: Bring work that was built with pgv-build into a branch - take the works that enter together (one or several), merge them onto the present tip of the target, collect the deferred checks their builds left, validate them once on that merged commit, repair or take out what fails, then move the target to exactly that commit. Use when the user asks to merge, push, promote, release, or prepare or open a pull request for work built with pgv-build, or to run the deferred or pending validations. Signs that work was built with pgv-build are files named *-deferred.md beside its plan, or the user saying PGV.
 ---
 
 # PGV integrate
 
-Build runs put work into the entry branch fast, each one validating only what
-it must prove by itself and filing the rest as deferred checks. This skill is
-where that unfinished validation is finished: once, on the commit that
-actually enters the next branch, with everything that enters together in it.
+A build validates only what its own work must prove, and leaves the rest as
+deferred checks: what would have to be run again anyway once the work is
+combined with other work. This skill is where that is finished: once, on the
+commit that actually enters, with everything that enters together in it.
 
-This skill is one of three: `pgv-setup` records which branches exist and
-which model does which job, `pgv-build` builds one piece of work,
-`pgv-integrate` (this skill) brings what was built into a gated branch.
+It runs the same way for one work and for several, and it does not care how
+the repository arranges its branches. The user names what enters and where;
+the skill makes the commit that would result, validates it, and moves the
+target to that commit.
+
+This skill is one of three: `pgv-setup` records which model does which job,
+`pgv-build` builds one piece of work, `pgv-integrate` (this skill) brings
+what was built into a branch.
 
 You are **Main**: the agent the user asked. You start a **Validator** and,
 when a check fails, a **Repairer**, each in a fresh context; they never talk
 to each other, and what passes between them is the written report. Read
-[references/records.md](references/records.md) for where everything is kept
-and the exact commands, [references/packets.md](references/packets.md) before
-you delegate, and [references/model-routing.md](references/model-routing.md)
-for which model runs which role.
+[references/records.md](references/records.md) for the files and the
+commands, [references/packets.md](references/packets.md) before you
+delegate, and [references/model-routing.md](references/model-routing.md) for
+which model runs which role.
 
 ## 1. Look
 
 Find out, without changing anything:
 
-- **The configuration** (the issue labeled `pgv:config`). If there is none,
-  stop: PGV has not been set up for this repository, so neither the branches
-  nor the models of the roles are decided. Tell the user to run `pgv-setup`
-  first and offer to start it now. Whether to merge or push in the ordinary
-  way without PGV is the user's to say; that is then done outside this skill.
-- **Source and target.** The target is the branch the user named. The source
-  is what they want to bring in, normally the branch just below the target.
-  If the target is not gated, nothing is required: do what the user asked.
-- **The commit that will enter.** A gate status belongs to one exact commit,
-  and that commit must be the one that becomes the target's tip. So the
-  source must already contain the target: if the target has commits that the
-  source lacks, they are merged into the source first (step 3), and the
-  result is what gets validated. GitHub can only hold a status for a commit
-  it has, so the source is pushed before validation.
-- **What must pass.** Every open deferred check `to:<target>`. Read their
-  bodies in full. If there is none, nothing was left for this branch: the
-  gate status can be written as `success` with that said, and you go to
-  step 6.
-- **What is already known.** The gate status on that commit, if any. If it is
-  already `success`, skip to step 6.
+- **The models.** `pgv.md` in the plans folder if there is one, otherwise the
+  defaults of the routing reference.
+- **The target and what enters.** The target is the branch the user named,
+  or `release` when a commit is about to be released. What enters is one
+  work or several: the branches the user named (a pull request is its
+  branch). If the user did not say which, propose the works that have open
+  deferred checks addressed to this target, and ask.
+- **Whether an entry into this target is already running.** An entry record
+  of this target with `Status: in progress` means one is, here or in another
+  session, or that one was abandoned. Do not start a second: tell the user,
+  who says whether to wait, to take that one over, or to close it.
+- **What must pass.** The open deferred checks addressed to this target, in
+  the deferred files of the works that enter (the records reference says how
+  they are found). Read them in full. A work with no deferred file left
+  nothing, or was not built with `pgv-build`: say which, so that the user
+  decides whether it enters as it is.
 
 Then put the checks in order. Deferred checks that ask for the same thing
-(three build runs each deferring the full regression suite) become one item
-to run, with every issue that asked for it listed under it and their notes
-on "what an existing check will see differently" gathered together.
+(three builds each deferring the full regression suite) become one item to
+run, with every check that asked for it listed under it and their notes on
+"what an existing check will see differently" gathered together. This is the
+only place where overlap between works is found: a build does not need to
+know what another build deferred.
 
 ## 2. Say what will happen and ask
 
 Before anything runs, tell the user in their language, briefly:
 
-- what will be validated (the grouped list, with issue numbers), on which
-  commit, and where each check runs if the issue says;
+- which works enter, onto which commit of the target;
+- what will be validated (the grouped list, and which works asked for each
+  item), and where each check runs if the deferred check says;
 - anything that looks out of date, duplicated or impossible to carry out as
-  written, with a proposal (edit, close, or run as is);
-- what happens if a check fails: you will have it repaired by a fresh agent
-  from the report and validate again, unless they prefer to hand the report
-  to the session that did the work, or to stop and look.
+  written, with a proposal (edit, drop, or run as is);
+- that a work with no deferred check enters without anything being run for
+  it, if there is such a work.
 
-Use plain words. Deferred check and gate status are this skill's own terms
-and the user has not read this file: say "the validation that was left for
-this moment", "the mark that this commit passed". Show the list as a
-table, and keep the question itself to one short sentence.
+And ask what they have to decide:
 
-Then ask whether to proceed. Start nothing before the answer. If the user
-has said beforehand that integrations may run without asking, still state
-all of the above first, then go on.
+- **What to do when a check fails**: have it repaired here by a fresh agent
+  and validate again; or take the work that caused it out of this entry,
+  hand its session the report, and go on with the rest; or stop and look.
+- **Whether a pull request is wanted** for what enters, and whether the
+  result is pushed. Push nothing that the user did not ask to be pushed.
 
-A check may be left out only by the user's decision. Record it on the issue
-as a waiver (who decided, when, why) and close it if it is a deferred check;
-never drop one silently, and never mark as passed what was not run.
+Use plain words. Deferred check, candidate and entry record are this skill's
+own terms and the user has not read this file: say "the validation that was
+left for this moment", "the merged commit". Show the list as a table, and
+keep each question to one short sentence.
 
-## 3. Prepare the commit
+Start nothing before the answer. If the user has said beforehand that
+entries may run without asking, still state all of the above first, then go
+on.
 
-If the target has commits the source lacks, merge the target into the source
-on the source branch (with the user's agreement from step 2), resolve
-conflicts as the repository's rules say, and push the source branch. Note the
-head commit: every result of this round is tied to it.
+A check may be left out only by the user's decision. Record it as a waiver
+(who decided, when, why); never drop one silently, and never mark as passed
+what was not run.
+
+When the user has answered, write the entry record with
+`Status: in progress`. That line is what tells another session that this
+target is taken.
+
+## 3. Make the candidate
+
+Work in a working copy of your own, not in a checkout someone is working in.
+
+- Make a branch `pgv-entry-<target>` at the present tip of the target and
+  merge each work that enters into it. The commit it ends on is the
+  **candidate**: what the target will be if everything passes.
+- One work that already contains the tip of the target needs no merge: its
+  head is the candidate.
+- For `release` nothing is merged: the candidate is the commit that is about
+  to be released.
+
+A merge conflict belongs to the work that enters later, since what is in the
+target was validated when it entered. By the user's choice in step 2 the
+work is taken out and goes back to its session, which takes the target into
+its branch and resolves it there, or the conflict is resolved here as the
+repository's rules say.
+
+Note the candidate's commit: every result of this round is tied to it.
 
 ## 4. Validate
 
 Start Validator fresh-context and read-only for product code, with the packet
-of [references/packets.md](references/packets.md): the commit, the grouped
-checks with the full text of their issues, and the earlier round's report if
-there was one. It works in a checkout of exactly that commit, runs each check
-as the issue says, and writes one report with a verdict for every item. A
-failed check does not end the others. Where a check runs (this machine, a
-machine it drives, a hosted runner) is whatever the issue says; the Validator
-needs only the issue text, the code and an agent harness.
+of [references/packets.md](references/packets.md): the candidate, the grouped
+items with the full text of their deferred checks, and the earlier round's
+report if there was one. It works in a checkout of exactly that commit, runs
+each item as the deferred checks say, and writes one report with a verdict
+for every item. A failed check does not end the others. Where a check runs
+(this machine, a machine it drives, a hosted runner) is whatever the
+deferred check says.
 
-When it returns, confirm the report covers every item, then record it on
-GitHub ([references/records.md](references/records.md)):
+When it returns, confirm the report covers every item, then write the
+results into the entry record: the candidate's commit with its verdict, and
+each item with its result.
 
-- on each issue, a result comment for that issue;
-- each deferred check that passed: closed;
-- the gate status on the commit: `success` only when every item passed or was
-  waived by the user; otherwise `failure`.
+The pass of a candidate is what lets it in, so it is the one thing you must
+not write on trust. Write it only from a report that accounts for every item
+at that exact commit.
 
-The gate status is what lets the commit in, so it is the one thing you must
-not write on trust. Post `success` only from a report that accounts for every
-open deferred check of the target at that exact commit.
+## 5. When something fails
 
-## 5. Repair, then validate again
+The Validator has said what failed, with evidence and, where the evidence
+points at one, the suspected commit or work. It does not fix.
 
-When something failed, the Validator has said what failed, with evidence and,
-where the evidence points at one, the suspected commit. It does not fix, and
-it does not need to know who built what.
+By the user's choice in step 2:
 
-Give the report to a Repairer. By default that is a fresh agent in a working
-copy of the source branch, with the repair packet of
-[references/packets.md](references/packets.md): the failed items, the text of
-their issues, the evidence. If the user chose to hand the report to the
-session that did the work, give them the report (the result comments on the
-issues hold it) and wait for the fix to land on the source branch.
+- **Repair.** Give the report to a Repairer: a fresh agent in the working
+  copy of the candidate, with the repair packet of
+  [references/packets.md](references/packets.md). A repair is new commits on
+  the candidate branch.
+- **Take the work out.** Make the candidate again without that work, and
+  give the work's session the failed items and their evidence. Record it
+  under "Taken out". The work comes back in a later entry, after its session
+  has taken the then present target into its branch and repaired it.
 
-A repair is new commits on the source branch, pushed. That makes a new head
-with no status, so go back to step 4 with a fresh Validator. Give it the
-earlier report: it runs again what the repair touches and reuses an earlier
-result only after establishing that it still holds for the new commit.
+Either way there is a new candidate commit with no result, so go back to
+step 4 with a fresh Validator. Give it the earlier report: it runs again
+what the change touches and reuses an earlier result only after establishing
+that it still holds for the new commit.
 
 Stop and report to the user, with the evidence, when the same failure returns
 without new evidence, when a repair would change behavior that a done state
-or an issue fixes, or after 5 rounds. A failure that also exists on the
-target without this work is not this integration's defect: show it to the
+or a deferred check fixes, or after 5 rounds. A failure that also exists on
+the target without these works is not this entry's defect: show it to the
 user, who decides whether it blocks.
 
 ## 6. Bring it in
 
-With `success` on the head commit, do what the user asked for: fast-forward
-the target and push, or open the pull request and merge it. GitHub checks the
-status itself; do not look for a way around a refusal. If it refuses, read
-why (the status is on another commit, the branch moved, another rule applies)
-and return to the step that fixes it.
+With a pass on the candidate:
+
+- **Check that the target has not moved** since the entry started. If it
+  has, something entered outside this skill: merge the new tip into the
+  candidate, which makes a new commit, and return to step 4.
+- **Move the target to the candidate by fast-forward only**
+  (`git merge --ff-only`). Never bring the candidate in by a merge that
+  makes a new commit: that commit was not validated.
+- **If the user wanted a pull request**: push the candidate branch and open
+  the pull request against the target before the target is moved. When the
+  moved target is pushed, the host shows the pull request as merged by
+  itself. Do not use the host's merge button; it makes a new commit.
+- **Push** the target only if the user asked.
+- **For `release`**: put the tag on the candidate.
+
+Then finish the records: in each deferred file, the status of every check
+that passed or was waived; in the entry record, `entered at <commit>` and
+what was repaired or taken out on the way. Delete the candidate branch.
 
 Report in the user's language: what entered and at which commit, which
-deferred checks were closed, what was waived, what
-was repaired on the way and by which commits, and anything the user should
-look at. If something could not be validated, say exactly what and why; do
-not round it up.
+checks passed, what was waived, what was repaired and by which commits, what
+was taken out and why, and anything the user should look at. If something
+could not be validated, say exactly what and why; do not round it up.
 
 ## What keeps this honest
 
-- One commit, one status. Anything that changes the commit (a repair, a merge
-  of the target, a rebase) means the earlier status says nothing about it.
+- One commit, one result. Anything that changes the commit (a repair, a
+  merge of the target, a rebase) means the earlier result says nothing about
+  it. The target becomes the commit that passed, not one like it.
 - The Validator is always fresh and never edits the code it judges; the
   Repairer never judges its own repair.
-- Only issues and their comments carry context between rounds and between
-  machines. Write them so that a reader with nothing else can act. Never
-  write session identifiers, local paths, host names or secrets into them:
-  they are as visible as the repository.
-- Only the user removes a requirement: waiving a check, changing which
-  branches are gated.
+- Only the files carry context between rounds, sessions and machines. Write
+  them so that a reader with nothing else can act.
+- Only the user removes a requirement: waiving a check, letting in a work
+  that has none, closing an entry that another session left in progress.
