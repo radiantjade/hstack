@@ -18,7 +18,10 @@ once, on the merged commit, when the work enters a branch.
 The records are files beside the repository's plans. The skills need Git and
 nothing else: no host such as GitHub, no issue, label, commit status or
 branch rule, and they do not fix how a repository arranges its branches.
-`skills/pgv-build/references/records.md` describes the files.
+`skills/pgv-build/references/records.md` describes the files. The file of
+the models, `pgv.md`, is each user's own: at the first setup `pgv-setup`
+asks whether to add it to `.gitignore`, commit it with the plans, or keep it
+at another path.
 
 ## Layout
 

@@ -26,8 +26,9 @@ for where the models and the deferred checks are kept.
 
 ## Before Stage 0 — the models
 
-Read `pgv.md` in the plans folder
-([references/records.md](references/records.md)). If it exists, its
+Read `pgv.md`: it is in the plans folder or at a path the user gave, and
+[references/records.md](references/records.md), "Where `pgv.md` is", says
+how it is found. If it exists, its
 assignment is in force. If it does not, the defaults of the routing
 reference are in force: nothing has to be set up before a build.
 

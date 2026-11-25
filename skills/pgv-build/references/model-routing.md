@@ -22,7 +22,7 @@ checkout, so a single edit applies to both.
 ## Default assignment
 
 The assignment in force is the one in the repository's `pgv.md` (the file
-that `pgv-setup` writes in the plans folder; see `records.md`). Read it
+that `pgv-setup` writes; `records.md` says where it is found). Read it
 before recording the manifest, and follow it unless the user explicitly
 overrides a role for this run. The table below is what `pgv-setup` proposes
 to the user, and what is in force when there is no `pgv.md` or it does not

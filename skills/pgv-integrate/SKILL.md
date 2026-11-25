@@ -31,8 +31,10 @@ which model runs which role.
 
 Find out, without changing anything:
 
-- **The models.** `pgv.md` in the plans folder if there is one, otherwise the
-  defaults of the routing reference.
+- **The models.** `pgv.md` if there is one (in the plans folder or at a
+  path the user gave; [references/records.md](references/records.md),
+  "Where `pgv.md` is", says how it is found), otherwise the defaults of the
+  routing reference.
 - **The target and what enters.** The target is the branch the user named,
   or `release` when a commit is about to be released. What enters is one
   work or several: the branches the user named (a pull request is its

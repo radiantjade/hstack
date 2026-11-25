@@ -19,18 +19,43 @@ folder for several repositories).
 
 | Record | File | Written by |
 |---|---|---|
-| Models | `pgv.md` in the plans folder. Optional: without it the defaults of `model-routing.md` are in force. | `pgv-setup` |
+| Models | `pgv.md`, in the plans folder or at a path the user gave ("Where `pgv.md` is", below). Optional: without it the defaults of `model-routing.md` are in force. | `pgv-setup` |
 | Deferred checks | `<plan-slug>-deferred.md` beside the plan of the work. One file for one build, with all the checks that build left. | `pgv-build` |
 | Entry record | `<date>-entry-<target>.md` in the plans folder. One for each entry of work into a target. | `pgv-integrate` |
 | Validation reports | `<plan-slug>-validation-r<N>.md` beside the plan; `<entry-slug>-validation-r<N>.md` beside the entry record. | Validator |
 
-Commit these files the way the repository commits its plans. They are plan
+Commit these files the way the repository commits its plans; `pgv.md` is
+committed only where the user chose that (below). They are plan
 documents: a change of one of them (a status line, a result) does not change
 the product, so it does not make a validated commit unvalidated.
 
 Where the plans folder is inside a repository that others can read, write
 nothing private into these files: no session or thread identifier, no local
 path, host name, key or address.
+
+### Where `pgv.md` is
+
+Which models a user runs is that user's own choice, so the file need not be
+part of the repository. At the first setup `pgv-setup` asks the user, and
+the file is kept in one of three ways:
+
+- **In the plans folder, ignored by Git.** Its path is in the `.gitignore`
+  of the repository that holds the plans folder. It is never committed.
+- **In the plans folder, committed** with the plans.
+- **At a path the user gave.** The repository holds nothing of it. The path
+  is kept in the Git configuration of this clone, which Git does not commit
+  or push: `git config --local pgv.models <absolute path>`.
+
+To find the models, look in this order:
+
+1. `git config --get pgv.models` in the repository of the work. If it gives
+   a path, the file at that path is the assignment. If no file is there,
+   stop and tell the user; do not go on with the defaults.
+2. `pgv.md` in the plans folder. If the plans folder is in a linked worktree
+   and the file is not there, read it from the same place in the
+   repository's main working tree (the first line of `git worktree list`):
+   a file that Git ignores exists only where it was written.
+3. Neither is there: the defaults of `model-routing.md`.
 
 ## What the records mean
 
@@ -152,6 +177,9 @@ Candidate: <r1: commit, FAIL> <r2: commit, PASS> ...
 ## Commands
 
 ```bash
+# The path of the models file, where the user gave one (nothing: look in the plans folder)
+git config --get pgv.models
+
 # Deferred files that still have an open check
 grep -l '^Status: open' <plans folder>/*-deferred.md
 
