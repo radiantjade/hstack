@@ -1,0 +1,6 @@
+interface:
+  display_name: "PGV build"
+  short_description: "Plan, implement and independently validate one piece of work"
+  default_prompt: "Use $pgv-build to plan, implement, and independently validate this software engineering task."
+policy:
+  allow_implicit_invocation: false
