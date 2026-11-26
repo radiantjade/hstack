@@ -64,8 +64,11 @@ between sessions, use that function, not a shell command.
 
 **Claude Code, desktop app.**
 - Start it with the app's tool that starts a separate session: a fresh
-  context, the build session's model, the caller's own permission mode, the folder
-  where the work is made, and a name that names the work.
+  context, the build session's model, the caller's own permission mode, a
+  worktree of the repository of the work, and a name that names the work.
+  Where the caller's own session is in that repository, the tool's option
+  for a worktree of its own makes it; where it is not, make the worktree
+  with `git worktree add` and give that folder as the session's folder.
 - The app starts a session at the caller's effort or lower. When the
   build session's effort is higher than the caller's, do it in this order: start
   the session with a prompt that only tells it to wait for the brief; set
@@ -80,7 +83,9 @@ between sessions, use that function, not a shell command.
   both directions.
 
 **Claude Code, terminal.**
-- Start it in the folder where the work is made:
+- Make the build's worktree with
+  `git worktree add <path> -b <branch> <the branch the work will enter>`,
+  and start the session in that folder:
   `claude --bg --name <name> --model claude-opus-5-5 --effort xhigh --permission-mode <the caller's> "<prompt>"`.
   It prints the session's id: keep it. A long brief goes in a file that the
   prompt names.

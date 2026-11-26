@@ -166,6 +166,15 @@ is made, the routing manifest, and the name under which it reaches you. The
 build session starts fresh: it knows nothing of your conversation but the
 brief.
 
+**Each build is made in a working tree of its own.** Builds can run at the
+same time, and a build can be started while another is still running. Two
+builds that write in one working tree overwrite or pick up each other's
+changes, and then neither diff is the work of one build. So start the build
+session in a Git worktree of the repository, on a branch of this work, taken
+from the branch the work will enter unless the user says otherwise. Use the
+repository's own checkout only when the user says so. The brief names the
+worktree and the branch.
+
 Tell the user that the build session started, its name, and that they can
 open it. Then end your turn. You do not plan, delegate or check on it: its
 messages reach you.
