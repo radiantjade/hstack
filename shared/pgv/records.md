@@ -4,58 +4,76 @@ This file is the same in `pgv-setup`, `pgv-build` and
 `pgv-integrate`. Its
 source is `shared/pgv/records.md`; `tools/sync-pgv-shared.sh` copies it.
 
-The three skills keep what they need to remember as files beside the plans.
-They need Git and nothing else: no host such as GitHub, no issue, label,
-commit status or branch rule. A pull request, where one is used, is opened by
-the user's usual way for work that was already validated; it is not a record
-of these skills.
+The three skills keep what they need to remember as files in one folder, the
+**PGV folder**. PGV commits none of these files. They are the working files of
+the person who runs PGV; what the repository keeps of a piece of work is its
+commits. The skills need Git and nothing else: no host such as GitHub, no
+issue, label, commit status or branch rule. A pull request, where one is
+used, is opened by the user's usual way for work that was already validated;
+it is not a record of these skills.
 
 ## Where the files are
 
-**The plans folder** is where this repository's plans are kept: `docs/plans/`
-unless the repository's own instructions name another place. It may be inside
-the repository or outside it (some projects keep their plans in a separate
-folder for several repositories).
+**The PGV folder** is `.pgv/` at the top of the repository's main working
+tree (the first line of `git worktree list`). Every worktree and every
+session of the repository reads and writes that one folder, not a `.pgv/` of
+its own worktree. The user is not asked where the files go.
 
-| Record | File | Written by |
+A repository can name another folder with
+`git config --local pgv.dir <absolute path>`, which Git does not commit or
+push. Set it only when the user asks for another place; where it is set, that
+folder is the PGV folder, and if no folder is at that path, stop and tell
+the user.
+
+### Keeping `.pgv/` out of Git
+
+PGV never stages or commits a file of the PGV folder. Whether Git is also
+told to leave `.pgv/` out is the user's choice. It is asked once for a
+repository, before the first file is written there: when
+`git config --get pgv.exclude` gives nothing and Git does not ignore the
+folder yet (`git check-ignore -q .pgv/x` in the main working tree). The
+skill that is about to write asks: `pgv-setup`, or the caller of `pgv-build`
+before Stage 0.
+
+They are two questions, asked one after the other, each by itself, in the
+user's language; never one question with all the answers in it.
+
+**First question.**
+
+- "Exclude `.pgv/` from Git? PGV keeps its plans and reports in that folder."
+- **Yes**
+- **No**: Git shows the folder as untracked; PGV still commits nothing of it.
+
+**Second question, only after a yes.**
+
+- "How should `.pgv/` be excluded?"
+- **Add it to `.gitignore`**: the line `/.pgv/` in the `.gitignore` at the
+  top of the main working tree. It is a change of a file of the repository,
+  so everyone who uses the repository gets it once it is committed. Leave
+  that commit to the way the repository takes commits.
+- **Exclude it in this clone only**: the same line in
+  `$(git rev-parse --git-common-dir)/info/exclude`. Git never commits that
+  file, so no file of the repository changes and other clones are not told.
+
+Do not choose for the user, and do not write a PGV file before the answer.
+Record the answer so that it is not asked again:
+`git config --local pgv.exclude <gitignore | clone | no>`. Nothing is asked
+where `pgv.dir` names a folder outside the repository.
+
+A turn that works in another folder (the worktree of a build, the checkout
+of a candidate) is given access to the PGV folder, to read the plan and to
+write its report.
+
+| Record | File in the PGV folder | Written by |
 |---|---|---|
-| Models | `pgv.md`, in the plans folder or at a path the user gave ("Where `pgv.md` is", below). Optional: without it the defaults of `model-routing.md` are in force. | `pgv-setup` |
-| Deferred checks | `<plan-slug>-deferred.md` beside the plan of the work. One file for one build, with all the checks that build left. | `pgv-build` |
-| Entry record | `<date>-entry-<target>.md` in the plans folder. One for each entry of work into a target. | `pgv-integrate` |
-| Validation reports | `<plan-slug>-validation-r<N>.md` beside the plan; `<entry-slug>-validation-r<N>.md` beside the entry record. | Validator |
+| Models | `pgv.md`. Optional: without it the defaults of `model-routing.md` are in force. | `pgv-setup` |
+| Plan | `<date>-<slug>.md`. One for one build, versioned inside the file. | `pgv-build` |
+| Deferred checks | `<plan-slug>-deferred.md`. One file for one build, with all the checks that build left. | `pgv-build` |
+| Entry record | `<date>-entry-<target>.md`. One for each entry of work into a target. | `pgv-integrate` |
+| Validation reports | `<plan-slug>-validation-r<N>.md` for a build; `<entry-slug>-validation-r<N>.md` for an entry. | Validator |
 
-Commit these files the way the repository commits its plans; `pgv.md` is
-committed only where the user chose that (below). They are plan
-documents: a change of one of them (a status line, a result) does not change
-the product, so it does not make a validated commit unvalidated.
-
-Where the plans folder is inside a repository that others can read, write
-nothing private into these files: no session or thread identifier, no local
-path, host name, key or address.
-
-### Where `pgv.md` is
-
-Which models a user runs is that user's own choice, so the file need not be
-part of the repository. At the first setup `pgv-setup` asks the user, and
-the file is kept in one of three ways:
-
-- **In the plans folder, ignored by Git.** Its path is in the `.gitignore`
-  of the repository that holds the plans folder. It is never committed.
-- **In the plans folder, committed** with the plans.
-- **At a path the user gave.** The repository holds nothing of it. The path
-  is kept in the Git configuration of this clone, which Git does not commit
-  or push: `git config --local pgv.models <absolute path>`.
-
-To find the models, look in this order:
-
-1. `git config --get pgv.models` in the repository of the work. If it gives
-   a path, the file at that path is the assignment. If no file is there,
-   stop and tell the user; do not go on with the defaults.
-2. `pgv.md` in the plans folder. If the plans folder is in a linked worktree
-   and the file is not there, read it from the same place in the
-   repository's main working tree (the first line of `git worktree list`):
-   a file that Git ignores exists only where it was written.
-3. Neither is there: the defaults of `model-routing.md`.
+"Beside the plan" in the skills means in the PGV folder, under the plan's
+slug.
 
 ## What the records mean
 
@@ -177,17 +195,24 @@ Candidate: <r1: commit, FAIL> <r2: commit, PASS> ...
 ## Commands
 
 ```bash
-# The path of the models file, where the user gave one (nothing: look in the plans folder)
-git config --get pgv.models
+# The PGV folder, where the user asked for another place (nothing: .pgv/ of the main working tree)
+git config --get pgv.dir
+
+# How the user chose to keep .pgv/ out of Git (nothing: not asked yet)
+git config --get pgv.exclude
+
+# The main working tree, and whether Git ignores the PGV folder there
+git worktree list | head -1
+git check-ignore -q .pgv/pgv.md && echo ignored
 
 # Deferred files that still have an open check
-grep -l '^Status: open' <plans folder>/*-deferred.md
+grep -l '^Status: open' <PGV folder>/*-deferred.md
 
 # Is the work of a deferred file in the candidate and not yet in the target?
 git merge-base --is-ancestor <work commit> <candidate> && ! git merge-base --is-ancestor <work commit> <target>
 
 # An entry into this target that is still running
-grep -l '^Status: in progress' <plans folder>/*-entry-<target>.md
+grep -l '^Status: in progress' <PGV folder>/*-entry-<target>.md
 
 # The candidate: the works merged onto the present tip of the target
 git switch -c pgv-entry-<target> <target>

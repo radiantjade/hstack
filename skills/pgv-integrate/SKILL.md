@@ -1,6 +1,6 @@
 ---
 name: pgv-integrate
-description: Bring work that was built with pgv-build into a branch - take the works that enter together (one or several), merge them onto the present tip of the target, collect the deferred checks their builds left, validate them once on that merged commit, repair or take out what fails, then move the target to exactly that commit. Use when the user asks to merge, push, promote, release, or prepare or open a pull request for work built with pgv-build, or to run the deferred or pending validations. Signs that work was built with pgv-build are files named *-deferred.md beside its plan, or the user saying PGV.
+description: Bring work that was built with pgv-build into a branch - take the works that enter together (one or several), merge them onto the present tip of the target, collect the deferred checks their builds left, validate them once on that merged commit, repair or take out what fails, then move the target to exactly that commit. Use when the user asks to merge, push, promote, release, or prepare or open a pull request for work built with pgv-build, or to run the deferred or pending validations. Signs that work was built with pgv-build are files named *-deferred.md in PGV's folder (.pgv/ of the repository, or the path in git config pgv.dir), or the user saying PGV.
 ---
 
 # PGV integrate
@@ -23,7 +23,8 @@ You are **Main**: the agent the user asked. You start a **Validator** and,
 when a check fails, a **Repairer**, each in a fresh context; they never talk
 to each other, and what passes between them is the written report. Read
 [references/records.md](references/records.md) for the files and the
-commands, [references/packets.md](references/packets.md) before you
+commands (the files are in the PGV folder, outside Git: commit none of
+them), [references/packets.md](references/packets.md) before you
 delegate, and [references/model-routing.md](references/model-routing.md) for
 which model runs which role.
 
@@ -31,10 +32,10 @@ which model runs which role.
 
 Find out, without changing anything:
 
-- **The models.** `pgv.md` if there is one (in the plans folder or at a
-  path the user gave; [references/records.md](references/records.md),
-  "Where `pgv.md` is", says how it is found), otherwise the defaults of the
-  routing reference.
+- **The models.** `pgv.md` in the PGV folder if there is one
+  ([references/records.md](references/records.md), "Where the files are",
+  says how that folder is found), otherwise the defaults of the routing
+  reference.
 - **The target and what enters.** The target is the branch the user named,
   or `release` when a commit is about to be released. What enters is one
   work or several: the branches the user named (a pull request is its

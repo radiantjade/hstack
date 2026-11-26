@@ -15,13 +15,14 @@ once, on the merged commit, when the work enters a branch.
 | `pgv-integrate` | To bring one work or several into a branch | Merges them onto the target, validates the deferred checks once, repairs or takes out what fails, moves the target to that commit |
 | `pgv-setup` | Only to use other models than the defaults | Writes which model does which job |
 
-The records are files beside the repository's plans. The skills need Git and
-nothing else: no host such as GitHub, no issue, label, commit status or
+The skills keep their files (the models, the plans, the checks left for an
+entry, the validation reports) in one folder, `.pgv/` of the repository, and
+commit none of them. The first time, the user is asked whether `.pgv/` is
+excluded from Git and, after a yes, how: a line in `.gitignore`, or an
+exclusion in that clone only. The skills need Git
+and nothing else: no host such as GitHub, no issue, label, commit status or
 branch rule, and they do not fix how a repository arranges its branches.
-`skills/pgv-build/references/records.md` describes the files. The file of
-the models, `pgv.md`, is each user's own: at the first setup `pgv-setup`
-asks whether to add it to `.gitignore`, commit it with the plans, or keep it
-at another path.
+`skills/pgv-build/references/records.md` describes the files.
 
 ## Layout
 

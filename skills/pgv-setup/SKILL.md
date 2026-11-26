@@ -1,6 +1,6 @@
 ---
 name: pgv-setup
-description: Set or change which model does which job in PGV for a repository - the session that runs a build, the generator, the validator - and write it to pgv.md, beside the plans or at a path the user gives, where pgv-build and pgv-integrate read it. Use when the user asks to set up or configure PGV or to change its models. PGV runs without it, on the default models.
+description: Set or change which model does which job in PGV for a repository - the session that runs a build, the generator, the validator - and write it to pgv.md in PGV's own folder (.pgv/), which PGV never commits, where pgv-build and pgv-integrate read it. Use when the user asks to set up or configure PGV or to change its models. PGV runs without it, on the default models.
 ---
 
 # PGV setup
@@ -8,10 +8,9 @@ description: Set or change which model does which job in PGV for a repository - 
 PGV needs no setup to run: `pgv-build` and `pgv-integrate` take the default
 models of [references/model-routing.md](references/model-routing.md). This
 skill is for a repository that wants other models. It settles with the user
-which model does which job and writes that into one file, `pgv.md`: beside
-the repository's plans, or at a path the user gives. Which models a user
-runs is that user's own choice, so the user also decides whether the file is
-part of the repository.
+which model does which job and writes that into one file, `pgv.md`, in the
+PGV folder. That folder holds every file of PGV, and PGV commits none of
+them.
 
 This skill is one of three: `pgv-setup` (this skill), `pgv-build`, which
 builds one piece of work, and `pgv-integrate`, which brings what was built
@@ -24,15 +23,11 @@ changes nothing on a host such as GitHub.
 
 ## 1. Look
 
-- **The plans folder**: where this repository keeps its plans (the records
-  reference says how it is found). If the folder you are in holds several
-  repositories, or the plans of several repositories are kept in one place,
-  find out which plans folder is meant before anything else.
-- **Whether `pgv.md` is already there**, looked for as the records
-  reference says ("Where `pgv.md` is"). If so, this run changes it: read
+- **The PGV folder**: found as the records reference says ("Where the
+  files are"). If the folder you are in holds several repositories, find out
+  which repository is meant before anything else.
+- **Whether `pgv.md` is already there.** If so, this run changes it: read
   it, and ask what should change. If not, this is the first setup.
-- **Which Git repository holds the plans folder**, if any, at the first
-  setup: its `.gitignore` is the one the last question is about.
 - **Which agents this machine can run**: whether the `claude` and `codex`
   commands exist, and the model of the session you are in. A role can only
   be given to a model the user can actually start. When the user names a
@@ -84,22 +79,13 @@ another family as the model whose work it checks. Offer only models this
 machine can run. A validator of the generator's family is independent only
 through its fresh context: say so in the few words of that choice.
 
-### At the first setup: whether Git ignores the file
+### At the first setup: whether `.pgv/` is excluded from Git
 
-Ask this once, when `pgv.md` is not there yet, after the models:
-
-- "Should `pgv.md` be added to `.gitignore`? It says which models you use,
-  and without that it is committed with the plans."
-
-Give exactly these three answers:
-
-- **Add it**: the file stays on this machine, outside Git.
-- **Do not add it**: the file is committed with the plans.
-- **Another path for `pgv.md`**: the user types the path; the repository
-  holds nothing of it.
-
-Where the plans folder is in no Git repository there is nothing to ignore:
-do not ask, and write the file in the plans folder.
+After the models, ask the two questions of the records reference ("Keeping
+`.pgv/` out of Git"), one after the other and each by itself: first whether
+`.pgv/` is excluded from Git, then, after a yes, how (`.gitignore`, or this
+clone only). Ask only when it was not asked before. Do not ask where the
+files go.
 
 ## 3. Write
 
@@ -109,23 +95,12 @@ session that calls `pgv-build`), with the default where the user kept it, and
 under "Notes" what the user said about how PGV should run here (where tests
 run, who must approve an entry into a branch).
 
-Where it is written, and what is done with Git, follows the user's answer at
-the first setup:
+First do what the user chose, as the records reference says: the line in
+`.gitignore`, the line in the clone's `info/exclude`, or nothing, and record
+the answer in `pgv.exclude`. Then make the folder and write the file in it.
 
-- **Add it.** Write the file in the plans folder. Add its path to the
-  `.gitignore` of the repository that holds the plans folder, as one line
-  from the top of that repository (for example `/docs/plans/pgv.md`). Do not
-  commit `pgv.md`. The change of `.gitignore` is committed only in the way
-  that repository takes commits.
-- **Do not add it.** Write the file in the plans folder. Commit it only in
-  the way the repository commits its plans.
-- **Another path.** Write the file at that path, and record the path in
-  each repository whose plans are in this plans folder:
-  `git config --local pgv.models <absolute path>`. Git does not commit or
-  push that setting. Change nothing else in the repository.
-
-When this run changes a `pgv.md` that is already there, write it where it
-is, and do not ask where it is kept.
+Never commit `pgv.md`. When this run changes a `pgv.md` that is already
+there, write it where it is, and do not ask where it is kept.
 
 ## 4. Hand over
 
@@ -138,5 +113,6 @@ Read the file back and tell the user:
 ## Changing it later
 
 Edit the table of `pgv.md`. It applies from the next run. Deleting the file
-returns the repository to the defaults; where the file was at a path the
-user gave, also remove the setting: `git config --local --unset pgv.models`.
+returns the repository to the default models. To move the PGV folder, move
+it and set or remove `pgv.dir` (`git config --local --unset pgv.dir` returns
+to `.pgv/`).

@@ -60,7 +60,7 @@ nothing else of the caller's conversation.
 You are the build session of one pgv-build run: Main and Planner. Use the pgv-build skill and start at Stage 1.
 Approved goal and policy record: <verbatim>
 Settled in the conversation and not in the record: <what the user said that bears on the plan, or none>
-Repository, the plans folder, and where the work is made: <paths; the branch or worktree>
+Repository, the PGV folder, and where the work is made: <paths; the branch or worktree>
 Relevant repository instructions, current state, source and test paths:
 Known constraints and preserved changes:
 Routing manifest: <verbatim>

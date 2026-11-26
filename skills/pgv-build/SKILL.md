@@ -34,7 +34,7 @@ routing manifest. Before delegating, read
 and evidence formats. Concrete model assignments, and how a session is
 started and reached, live only in model routing.
 Before drafting the goal, read [references/records.md](references/records.md)
-for where the models and the deferred checks are kept.
+for where the files of PGV are kept. None of them is committed.
 
 ## Which session you are
 
@@ -49,11 +49,16 @@ for where the models and the deferred checks are kept.
 
 ## Before Stage 0 — the models
 
-Read `pgv.md`: it is in the plans folder or at a path the user gave, and
-[references/records.md](references/records.md), "Where `pgv.md` is", says
-how it is found. If it exists, its
+Read `pgv.md` in the PGV folder;
+[references/records.md](references/records.md), "Where the files are", says
+how that folder is found. If it exists, its
 assignment is in force. If it does not, the defaults of the routing
 reference are in force: nothing has to be set up before a build.
+
+The files of this run are written in the PGV folder. If the user was not
+asked yet whether `.pgv/` is excluded from Git, ask the two questions of the
+records reference ("Keeping `.pgv/` out of Git") before anything is
+written.
 
 ## Stage 0 — Goal and decision policy (hard gate)
 
@@ -161,7 +166,7 @@ session as the routing reference says: its model and effort, how it is
 started on this host, and how the two sessions send each other messages.
 Its first input is the build brief of the review protocol: the approved
 goal and policy record verbatim, what the conversation settled that the
-record does not carry, the repository, the plans folder and where the work
+record does not carry, the repository, the PGV folder and where the work
 is made, the routing manifest, and the name under which it reaches you. The
 build session starts fresh: it knows nothing of your conversation but the
 brief.
@@ -198,8 +203,10 @@ session directly, and what they decide there holds.
 
 ## Stage 1 — Implementation-ready plan (Planner)
 
-Write a versioned plan at `docs/plans/<date>-<slug>.md` unless the repository
-uses another location. Embed the approved goal and selected policy verbatim.
+Write a versioned plan at `<date>-<slug>.md` in the PGV folder
+([references/records.md](references/records.md)). The plan and every other
+file of this run are working files outside Git: do not commit them, and do
+not write them among the repository's own documents. Embed the approved goal and selected policy verbatim.
 Include only what establishes:
 
 - why the selected approach can reach the done states, grounded in relevant
