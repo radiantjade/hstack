@@ -1,6 +1,6 @@
 ---
 name: pgv-build
-description: Build one piece of software-engineering work by plan, generate, validate - a user-approved goal and decision policy, an implementation-ready plan with cross-model review, scoped generation, and independent validation of what this work itself must prove, with the validation that only means something once the work is combined with other work left as deferred checks for pgv-integrate. Use only when the user asks to run pgv-build (/pgv-build or $pgv-build), PGV, or the Plan-Generate-Validate loop. Discussing or editing this skill does not invoke the workflow.
+description: Build one piece of software-engineering work by plan, generate, validate - a user-approved goal and decision policy, an implementation-ready plan made in a separate planner session and reviewed by the session the user is talking to, scoped generation, and independent validation of what this work itself must prove, with the validation that only means something once the work is combined with other work left as deferred checks for pgv-integrate. Use only when the user asks to run pgv-build (/pgv-build or $pgv-build), PGV, or the Plan-Generate-Validate loop, or when a session was started with the planner brief of a pgv-build run. Discussing or editing this skill does not invoke the workflow.
 ---
 
 # PGV build
@@ -15,14 +15,36 @@ work itself must prove. `pgv-integrate` takes the works that enter a branch
 together, one or several, runs once on the merged result the validation
 their builds left, and brings the result into the branch.
 
-Roles: **Main**, **Planner**, **Plan Reviewer**,
-**Generator**, **Validator**. Before assigning roles, read
+Roles: **Caller**, **Main**, **Planner**, **Plan Reviewer**,
+**Generator**, **Validator**. Two sessions carry the first four. The
+**caller** is the session the user asked: it agrees the goal with the user,
+starts the planner session, reviews the plan as Plan Reviewer, and passes on
+what the user must see or decide. The **planner session** is a separate
+interactive session that the caller starts: it is Main and Planner, and it
+runs the build from Stage 1 to Stage 8. The caller therefore does not run
+the build, and stays free for the user; several builds can run at the same
+time, each in a planner session of its own. Generator and Validator are
+terminal turns that the planner session starts.
+
+Before assigning roles, read
 [references/model-routing.md](references/model-routing.md) and record the
 routing manifest. Before delegating, read
 [references/review-protocol.md](references/review-protocol.md) for packets
-and evidence formats. Concrete model assignments live only in model routing.
+and evidence formats. Concrete model assignments, and how a session is
+started and reached, live only in model routing.
 Before drafting the goal, read [references/records.md](references/records.md)
 for where the models and the deferred checks are kept.
+
+## Which session you are
+
+- **The user asked you to run this skill: you are the caller.** Do "Before
+  Stage 0", Stage 0 and "Start the planner session". After that your part is
+  the plan review of Stage 2 and "The caller during the build". Stages 1 and
+  3 to 8 are not yours.
+- **You were started with the planner brief of a build: you are Main and
+  Planner.** Start at Stage 1. The goal and the decision policy in your
+  brief are approved: do not reopen them. Wherever a stage says to ask or
+  tell the user, send it to the caller, which is where the user is.
 
 ## Before Stage 0 — the models
 
@@ -122,13 +144,47 @@ choices to Main unless the packet already authorizes that class of choice.
 Main applies the selected policy and may consult Planner for technical
 judgment or preauthorize bounded choices in role packets.
 
-When user judgment is required, pause dependent work and present the fact,
-needed decision, options, recommendation, and consequences. Continue
+When user judgment is required, pause dependent work and send the caller a
+decision request: the fact, needed decision, options, recommendation, and
+consequences. The caller puts it to the user and returns the answer. Continue
 independent work when useful. Record delegated decisions in the plan: what
 was unexpected, the choice, its authority, rationale, and effect. Version
 material changes and update affected packets. Review a changed approach for
 affected blockers under Stage 2; preserve unaffected decisions and approved
 completion criteria.
+
+## Start the planner session (caller)
+
+When the goal is approved and the policy is settled, start the planner
+session as the routing reference says: its model and effort, how it is
+started on this host, and how the two sessions send each other messages.
+Its first input is the planner brief of the review protocol: the approved
+goal and policy record verbatim, what the conversation settled that the
+record does not carry, the repository, the plans folder and where the work
+is made, the routing manifest, and the name under which it reaches you. The
+planner session starts fresh: it knows nothing of your conversation but the
+brief.
+
+Tell the user that the planner session started, its name, and that they can
+open it. Then end your turn. You do not plan, delegate or check on it: its
+messages reach you.
+
+## The caller during the build
+
+A message from the planner session is one of these:
+
+- **A plan to review.** Review it under Stage 2 and answer with the verdict.
+- **A decision request.** Put it to the user as it came, and return the
+  user's answer in their words. Answer it yourself only where the
+  conversation with the user already settled it, and say where.
+- **A notice or the final report.** Tell the user. A report is the planner
+  session's claim: name the files that hold its evidence.
+
+Report only what the planner session sent: its silence is not a result. If a
+message to it cannot be delivered, the routing reference says how the
+session is brought back. Do not do Main's work: no change of this work's
+code, no Generator or Validator turn. The user may also talk to the planner
+session directly, and what they decide there holds.
 
 ## Stage 1 — Implementation-ready plan (Planner)
 
@@ -158,12 +214,14 @@ be handled during implementation under the decision policy. Resolve known
 feasibility or authority blockers before handoff. Defer details that depend
 on implementation evidence instead of pre-solving possible future choices.
 
-## Stage 2 — Cross-model review (Plan Reviewer)
+## Stage 2 — Plan review (caller)
 
-Start Reviewer in a fresh context with a different model family from Planner,
-using the assignment in routing. Give it the plan, approved agreements, and
-relevant source evidence, not the conversation or Planner's private reasoning.
-Review three questions:
+Planner sends the caller a request for review with the path and the version
+of the plan; the plan is the file, not the message. The caller reviews it as
+Plan Reviewer. It knows the conversation with the user, which the planner
+session does not: it checks the plan against what the user asked, reads the
+relevant source itself, and judges the plan as it is written, not Planner's
+reasoning. Review three questions:
 
 1. What concrete defect would prevent an approved done state from passing?
 2. Does the plan violate a user constraint, execution authority, required
@@ -183,15 +241,16 @@ no supported blocker remains. Record rejected findings with a brief reason.
 Delegated discretion cannot waive a supported correctness or authority defect.
 
 If the same disagreement repeats without new evidence, Main resolves a
-delegated choice or raises it under the selected policy. Cap: **5 turns per
+delegated choice or raises it under the selected policy; the caller then
+puts both positions to the user. Cap: **5 turns per
 side (10 executions total)**, a backstop, not a target. At the cap, stop and
 report the unresolved blocker and evidence.
 
 ## Stage 3 — Transition notice
 
-After approval, tell the user the agreed outcome, policy, plan path/version,
-routing manifest, and that generation is starting. This is a notice, not
-another approval gate. Later questions follow the selected policy.
+After approval, Main sends the caller a notice for the user: the agreed
+outcome, policy, plan path/version, routing manifest, and that generation is
+starting. This is a notice, not another approval gate. Later questions follow the selected policy.
 
 ## Stage 4 — Generate
 
@@ -280,7 +339,8 @@ needed to finish it: the work must not enter the target it is addressed to
 until the check passes there, and `pgv-integrate` is what runs it. Do not
 report the deferred items as validated.
 
-Report the outcome against the goal and compact evidence: changed files,
+Send the caller the final report, which it gives to the user. Report the
+outcome against the goal and compact evidence: changed files,
 checks and results, plan version, turn IDs, and limitations. List the
 deferred checks with the path of the deferred file and the target each is
 addressed to, and say that `pgv-integrate` runs them when the work enters.
@@ -289,9 +349,11 @@ and effects; reference the plan for detail rather than repeating routine work.
 
 ## Role boundaries and turn discipline
 
-- Main owns scope, routing, delegated decisions, assembly, communication,
-  and completion claims. Roles receive self-contained, versioned packets,
-  not the raw conversation transcript.
+- The caller owns the agreement with the user and the plan review. It does
+  not run the build.
+- Main owns scope, routing, delegated decisions, assembly, communication
+  with the caller, and completion claims. Roles receive self-contained,
+  versioned packets, not the raw conversation transcript.
 - Each delegation ends with a completed artifact or blocker. Do not send
   progress pings or start duplicate owners. Material new information requires
   the turn to return or be cancelled before replacement.

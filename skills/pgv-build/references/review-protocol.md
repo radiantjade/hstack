@@ -36,8 +36,8 @@ avoid copying full inputs already present in an attached plan.
 
 ```text
 Turn ID:
-Role: planner | plan-reviewer | generator | validator
-Turn kind: planning | plan-review | implementation | validation | repair | revalidation
+Role: generator | validator
+Turn kind: implementation | validation | repair | revalidation
 Plan version:
 Owned outcome:
 Authoritative inputs: <approved agreements and relevant sources>
@@ -51,22 +51,45 @@ Expected terminal artifact:
 Silence is not a handoff. Before replacing an active packet, let the turn
 return or cancel it.
 
-## Planner packet
+## Planner brief
+
+The caller starts the planner session with this brief. The session knows
+nothing else of the caller's conversation.
 
 ```text
+You are Main and Planner of one pgv-build run. Use the pgv-build skill and start at Stage 1.
 Approved goal and policy record: <verbatim>
+Settled in the conversation and not in the record: <what the user said that bears on the plan, or none>
+Repository, the plans folder, and where the work is made: <paths; the branch or worktree>
 Relevant repository instructions, current state, source and test paths:
 Known constraints and preserved changes:
-Required output: implementation-ready plan per Stage 1, written to <path>
+Routing manifest: <verbatim>
+The caller: <the name under which this session reaches the caller, and how, per model routing>
+Required output: implementation-ready plan per Stage 1, written to <path>, then a request for its review sent to the caller
 ```
 
 Apply Stage 1's necessity test and stopping condition. Conditional concerns
 do not become mandatory plan sections.
 
-## Plan-review packet
+## Messages between the planner session and the caller
+
+The caller's user sees the first line of a message before the rest, so that
+line says by itself what the message is:
 
 ```text
-Plan document: <full content or accessible path, including approved agreements>
+PGV <plan-slug>: <plan v<N> for review | review of plan v<N>: APPROVED/REVISE | decision needed | answer to decision <id> | generation starting | final report>
+<the body: a path for what is a file (the plan, a report); the text itself for a verdict, a decision request or an answer>
+```
+
+Send a path, not the content, for what is already a file: both sessions read
+the same disk. A message that got no answer is not an agreement.
+
+## Plan-review packet
+
+Planner sends the first three lines; the caller answers with the rest.
+
+```text
+Plan document: <accessible path and version, including approved agreements>
 Relevant code and evidence: <support for approach, constraints, and checks>
 Review scope: <initial: Stage 2 questions | re-review: confirmed blockers, changes, and their effects>
 Prior findings and disposition: <on re-review only>
@@ -75,8 +98,9 @@ Blocking findings: <id, location, affected condition, concrete failure/unnecessa
 Exchange: <n of maximum 5 per side>
 ```
 
-Reviewer gets neither the conversation nor Planner's private reasoning.
-Main adjudicates findings under Stage 2 and routes necessary revisions.
+The reviewer is the caller: it knows the conversation with the user, and it
+does not get Planner's private reasoning.
+Main adjudicates findings under Stage 2 and makes the necessary revisions.
 Record final disposition and approval in the plan. Optional observations
 remain separate from Generator obligations.
 
@@ -92,6 +116,8 @@ Authority boundary: <why Main/user judgment is required>
 Dependent work paused; independent work completed or available:
 ```
 
+What needs the user's judgment, Main sends to the caller in this form; the
+caller puts it to the user and returns the answer.
 Main records the resolution and updates affected packets per Stage 0.
 Generator reports decisions within preauthorized classes at handoff so Main
 can record them too.

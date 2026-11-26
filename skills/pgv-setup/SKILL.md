@@ -1,6 +1,6 @@
 ---
 name: pgv-setup
-description: Set or change which model does which job in PGV for a repository - the plan's reviewer, the builder, the validator - and write it to pgv.md, beside the plans or at a path the user gives, where pgv-build and pgv-integrate read it. Use when the user asks to set up or configure PGV or to change its models. PGV runs without it, on the default models.
+description: Set or change which model does which job in PGV for a repository - the planner, the builder, the validator - and write it to pgv.md, beside the plans or at a path the user gives, where pgv-build and pgv-integrate read it. Use when the user asks to set up or configure PGV or to change its models. PGV runs without it, on the default models.
 ---
 
 # PGV setup
@@ -68,10 +68,10 @@ Never open with an explanation and trail off into a question. Further rules:
 One question for each job that is a choice. Do not ask "keep these?" over a
 table of roles: the user has to decode the table before they can answer.
 
-- Planning is done by the model the user is talking to. That is not a
+- The plan is checked by the session the user is talking to. That is not a
   choice; state it as the opening of the next question.
-- "Planning is done by the model you are talking to. Which model should
-  check that plan separately?"
+- "The session you talk to checks the plan. Which model should make the plan
+  and run the build? It works in a session of its own."
 - "Which model should build what the plan says? It also repairs what
   validation finds."
 - "Which model should validate what was built? It checks the result the way
@@ -81,8 +81,7 @@ Each choice is a model with its effort (for example "Opus 5.5, xhigh"), the
 recommended one first, with a few words on why: the default of the routing
 reference, the repository's own rule where it has one, or the same or
 another family as the model whose work it checks. Offer only models this
-machine can run. The plan's checker is meant to be of another family than
-the planner, and a validator of the builder's family is independent only
+machine can run. A validator of the builder's family is independent only
 through its fresh context: say so in the few words of that choice.
 
 ### At the first setup: whether Git ignores the file
@@ -105,7 +104,8 @@ do not ask, and write the file in the plans folder.
 ## 3. Write
 
 Write `pgv.md` in the format of the records reference: all four roles (model,
-effort, and how it is started), with the default where the user kept it, and
+effort, and how it is started; the Plan Reviewer's row says that it is the
+session that calls `pgv-build`), with the default where the user kept it, and
 under "Notes" what the user said about how PGV should run here (where tests
 run, who must approve an entry into a branch).
 

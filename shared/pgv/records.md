@@ -94,8 +94,8 @@ Which model runs which role here.
 
 | Role | Model | Effort | Backend |
 |---|---|---|---|
-| Planner | <model> | <effort> | <how it is started> |
-| Plan Reviewer | <model> | <effort> | <how it is started> |
+| Planner | <model> | <effort> | <how its session is started> |
+| Plan Reviewer | The session that calls `pgv-build` | That session's effort | That session |
 | Generator | <model> | <effort> | <how it is started> |
 | Validator | <model> | <effort> | <how it is started> |
 
