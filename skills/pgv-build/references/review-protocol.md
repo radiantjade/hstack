@@ -51,13 +51,13 @@ Expected terminal artifact:
 Silence is not a handoff. Before replacing an active packet, let the turn
 return or cancel it.
 
-## Planner brief
+## Build brief
 
-The caller starts the planner session with this brief. The session knows
+The caller starts the build session with this brief. The session knows
 nothing else of the caller's conversation.
 
 ```text
-You are Main and Planner of one pgv-build run. Use the pgv-build skill and start at Stage 1.
+You are the build session of one pgv-build run: Main and Planner. Use the pgv-build skill and start at Stage 1.
 Approved goal and policy record: <verbatim>
 Settled in the conversation and not in the record: <what the user said that bears on the plan, or none>
 Repository, the plans folder, and where the work is made: <paths; the branch or worktree>
@@ -71,7 +71,7 @@ Required output: implementation-ready plan per Stage 1, written to <path>, then 
 Apply Stage 1's necessity test and stopping condition. Conditional concerns
 do not become mandatory plan sections.
 
-## Messages between the planner session and the caller
+## Messages between the build session and the caller
 
 The caller's user sees the first line of a message before the rest, so that
 line says by itself what the message is:

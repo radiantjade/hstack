@@ -1,6 +1,6 @@
 ---
 name: pgv-build
-description: Build one piece of software-engineering work by plan, generate, validate - a user-approved goal and decision policy, an implementation-ready plan made in a separate planner session and reviewed by the session the user is talking to, scoped generation, and independent validation of what this work itself must prove, with the validation that only means something once the work is combined with other work left as deferred checks for pgv-integrate. Use only when the user asks to run pgv-build (/pgv-build or $pgv-build), PGV, or the Plan-Generate-Validate loop, or when a session was started with the planner brief of a pgv-build run. Discussing or editing this skill does not invoke the workflow.
+description: Build one piece of software-engineering work by plan, generate, validate - a user-approved goal and decision policy, then a separate build session that runs the rest: an implementation-ready plan, which the session the user is talking to reviews, scoped generation, and independent validation of what this work itself must prove, with the validation that only means something once the work is combined with other work left as deferred checks for pgv-integrate. Use only when the user asks to run pgv-build (/pgv-build or $pgv-build), PGV, or the Plan-Generate-Validate loop, or when a session was started with the build brief of a pgv-build run. Discussing or editing this skill does not invoke the workflow.
 ---
 
 # PGV build
@@ -18,13 +18,14 @@ their builds left, and brings the result into the branch.
 Roles: **Caller**, **Main**, **Planner**, **Plan Reviewer**,
 **Generator**, **Validator**. Two sessions carry the first four. The
 **caller** is the session the user asked: it agrees the goal with the user,
-starts the planner session, reviews the plan as Plan Reviewer, and passes on
-what the user must see or decide. The **planner session** is a separate
-interactive session that the caller starts: it is Main and Planner, and it
-runs the build from Stage 1 to Stage 8. The caller therefore does not run
+starts the build session, reviews the plan as Plan Reviewer, and passes on
+what the user must see or decide. The **build session** is a separate
+interactive session that the caller starts: it runs this build from Stage 1
+to Stage 8. It is Main, and Planner too, since planning is the first step of
+what it runs. The caller therefore does not run
 the build, and stays free for the user; several builds can run at the same
-time, each in a planner session of its own. Generator and Validator are
-terminal turns that the planner session starts.
+time, each in a build session of its own. Generator and Validator are
+terminal turns that the build session starts.
 
 Before assigning roles, read
 [references/model-routing.md](references/model-routing.md) and record the
@@ -38,11 +39,11 @@ for where the models and the deferred checks are kept.
 ## Which session you are
 
 - **The user asked you to run this skill: you are the caller.** Do "Before
-  Stage 0", Stage 0 and "Start the planner session". After that your part is
+  Stage 0", Stage 0 and "Start the build session". After that your part is
   the plan review of Stage 2 and "The caller during the build". Stages 1 and
   3 to 8 are not yours.
-- **You were started with the planner brief of a build: you are Main and
-  Planner.** Start at Stage 1. The goal and the decision policy in your
+- **You were started with the build brief of a build: you are the build
+  session, Main and Planner.** Start at Stage 1. The goal and the decision policy in your
   brief are approved: do not reopen them. Wherever a stage says to ask or
   tell the user, send it to the caller, which is where the user is.
 
@@ -153,37 +154,37 @@ material changes and update affected packets. Review a changed approach for
 affected blockers under Stage 2; preserve unaffected decisions and approved
 completion criteria.
 
-## Start the planner session (caller)
+## Start the build session (caller)
 
-When the goal is approved and the policy is settled, start the planner
+When the goal is approved and the policy is settled, start the build
 session as the routing reference says: its model and effort, how it is
 started on this host, and how the two sessions send each other messages.
-Its first input is the planner brief of the review protocol: the approved
+Its first input is the build brief of the review protocol: the approved
 goal and policy record verbatim, what the conversation settled that the
 record does not carry, the repository, the plans folder and where the work
 is made, the routing manifest, and the name under which it reaches you. The
-planner session starts fresh: it knows nothing of your conversation but the
+build session starts fresh: it knows nothing of your conversation but the
 brief.
 
-Tell the user that the planner session started, its name, and that they can
+Tell the user that the build session started, its name, and that they can
 open it. Then end your turn. You do not plan, delegate or check on it: its
 messages reach you.
 
 ## The caller during the build
 
-A message from the planner session is one of these:
+A message from the build session is one of these:
 
 - **A plan to review.** Review it under Stage 2 and answer with the verdict.
 - **A decision request.** Put it to the user as it came, and return the
   user's answer in their words. Answer it yourself only where the
   conversation with the user already settled it, and say where.
-- **A notice or the final report.** Tell the user. A report is the planner
+- **A notice or the final report.** Tell the user. A report is the build
   session's claim: name the files that hold its evidence.
 
-Report only what the planner session sent: its silence is not a result. If a
+Report only what the build session sent: its silence is not a result. If a
 message to it cannot be delivered, the routing reference says how the
 session is brought back. Do not do Main's work: no change of this work's
-code, no Generator or Validator turn. The user may also talk to the planner
+code, no Generator or Validator turn. The user may also talk to the build
 session directly, and what they decide there holds.
 
 ## Stage 1 — Implementation-ready plan (Planner)
@@ -218,7 +219,7 @@ on implementation evidence instead of pre-solving possible future choices.
 
 Planner sends the caller a request for review with the path and the version
 of the plan; the plan is the file, not the message. The caller reviews it as
-Plan Reviewer. It knows the conversation with the user, which the planner
+Plan Reviewer. It knows the conversation with the user, which the build
 session does not: it checks the plan against what the user asked, reads the
 relevant source itself, and judges the plan as it is written, not Planner's
 reasoning. Review three questions:

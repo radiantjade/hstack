@@ -14,9 +14,9 @@ applies to both.
 
 | Role | What it does |
 |---|---|
-| Caller | The session the user asked to run `pgv-build`. It agrees the goal and the decision policy with the user, starts the planner session, reviews the plan as Plan Reviewer, and passes on what the user must see or decide. It does not run the build, so it stays free for the user. |
-| Main | Runs the workflow: starts Generator and Validator, decides what the user delegated, assembles, and reports. In `pgv-build` it is the planner session. In `pgv-integrate` it is the session the user asked. |
-| Planner | Plans how the approved goal is reached and by what checks that is verified. In `pgv-build` it is the same session as Main. |
+| Caller | The session the user asked to run `pgv-build`. It agrees the goal and the decision policy with the user, starts the build session, reviews the plan as Plan Reviewer, and passes on what the user must see or decide. It does not run the build, so it stays free for the user. |
+| Main | Runs the workflow: starts Generator and Validator, decides what the user delegated, assembles, and reports. In `pgv-build` it is the build session. In `pgv-integrate` it is the session the user asked. |
+| Planner | Plans how the approved goal is reached and by what checks that is verified. In `pgv-build` it is the build session too: planning is the first step of what that session runs. |
 | Plan Reviewer | Separately verifies the plan that Planner wrote. In `pgv-build` it is the caller. |
 | Generator | Implements the plan. In `pgv-integrate` the same assignment repairs a check that failed. |
 | Validator | Verifies the implementation, by the verification that the goal states. |
@@ -36,7 +36,7 @@ every delegated role; do not inherit a different host default silently.
 | Role | Model | Reasoning effort | Backend and access |
 |---|---|---|---|
 | Caller and Plan Reviewer | The host session's current model | The host session's current effort | Host session (Claude Code or Codex); read-only product code, may write the goal record and its review |
-| Main and Planner | Claude Opus 5.5 (`claude-opus-5-5`) | `xhigh` | The planner session: a separate interactive session that the caller starts (below); may write the plan; full within authorized scope as Main |
+| Build session (Main and Planner) | Claude Opus 5.5 (`claude-opus-5-5`) | `xhigh` | The build session: a separate interactive session that the caller starts (below); may write the plan; full within authorized scope as Main |
 | Generator | Claude Opus 5.5 (`claude-opus-5-5`) | `medium` | `claude -p`, fresh context; writable scope from packet |
 | Validator | `gpt-6.2-astra` | `xhigh` | `codex exec`, or a new Codex desktop app thread when the round needs computer use or browser use (below); fresh context; read-only product code, may write validation report |
 
@@ -48,15 +48,15 @@ it brings to the review is that it knows what the user asked.
 
 **In `pgv-integrate`** the host session is Main, the Validator assignment is
 the one above, and the agent that repairs a failed check takes the Generator
-assignment. There is no caller, no planner session and no Plan Reviewer.
+assignment. There is no caller, no build session and no Plan Reviewer.
 
-## The planner session
+## The build session
 
 One interactive session for one build, started by the caller with a fresh
 context. It keeps its context for the whole build, the user can open it and
 talk to it, and it exchanges messages with the caller. It is not a one-shot
 turn (`claude -p`, `codex exec`): those are for Generator and Validator,
-which take one packet and return one artifact, and which the planner session
+which take one packet and return one artifact, and which the build session
 starts.
 
 Where the host has its own function for starting a session and for messages
@@ -64,10 +64,10 @@ between sessions, use that function, not a shell command.
 
 **Claude Code, desktop app.**
 - Start it with the app's tool that starts a separate session: a fresh
-  context, the planner's model, the caller's own permission mode, the folder
+  context, the build session's model, the caller's own permission mode, the folder
   where the work is made, and a name that names the work.
 - The app starts a session at the caller's effort or lower. When the
-  planner's effort is higher than the caller's, do it in this order: start
+  build session's effort is higher than the caller's, do it in this order: start
   the session with a prompt that only tells it to wait for the brief; set
   its effort with the app's tool that sets another session's effort; read
   that session's settings back and confirm that its model and its effort are
@@ -95,7 +95,7 @@ between sessions, use that function, not a shell command.
 that the message itself carries. To begin an exchange, use the other
 session's name: the address behind a sender changes each time that session's
 process is started again, and the name does not. The caller gives the
-planner session its name; the brief tells the planner the caller's name.
+build session its name; the brief tells the build session the caller's name.
 
 **The two sessions run in the same permission mode.** A message between
 sessions in different modes is held for the user's approval and can expire.
@@ -106,15 +106,15 @@ thread or sends it a message; these commands do it (tried on 2026-11-26 with
 one build from start to end):
 - The caller learns its own thread id from `$CODEX_THREAD_ID` and puts it in
   the brief.
-- A Claude planner is started with the terminal command above. It sends a
+- A build session on a Claude model is started with the terminal command above. It sends a
   message to the caller with
   `codex queue --thread <the caller's id> --resume --message "<text>"`, which
   runs a turn on that thread.
-- The caller sends a message to a Claude planner that has ended its turn
+- The caller sends a message to a build session on a Claude model that has ended its turn
   with `claude stop <id>` followed by
   `claude --bg --resume <id> "<text>"`. Without the stop, the second command
   starts a copy of the session and leaves the original unanswered.
-- A planner that is a Codex model is a thread of its own: its first turn is
+- A build session on a Codex model is a thread of its own: its first turn is
   `codex exec -m <model> -c model_reasoning_effort="<effort>" "<prompt>"`,
   which prints the thread's id, and each later message to it is a
   `codex queue` as above.
@@ -158,13 +158,13 @@ not relax Validator's read-only access to product code.
 ## Manifest
 
 The caller records this manifest before Stage 0 of `pgv-build` and puts it
-in the brief of the planner session. `pgv-integrate` records it before its
+in the brief of the build session. `pgv-integrate` records it before its
 first validation round, with `main` as the host session and without the
 roles it does not have. Keep it frozen through repairs:
 
 ```text
 caller and plan-reviewer: <backend, model, reasoning effort, read-only product code>
-main and planner: <backend (the planner session, how it was started), model, reasoning effort, the session's name>
+build session (main and planner): <backend (the build session, how it was started), model, reasoning effort, the session's name>
 generator: <backend, model, reasoning effort, writable scope>
 validator: <backend (codex exec; Codex desktop app thread for rounds needing computer/browser use), model, reasoning effort, read-only product code, fresh context, browser use / computer use when e2e checks need them>
 fallbacks: none
@@ -174,12 +174,12 @@ fallbacks: none
 
 - **Isolation:** one fresh context per delegated terminal turn, with the model
   and effort pinned. Pass the self-contained packet, not conversation history.
-  The planner session starts fresh, from its brief, and never shares the
+  The build session starts fresh, from its brief, and never shares the
   caller's context. Validator never reuses Generator's session or an earlier
   validation session. A Codex desktop app thread is one turn: start a new
   thread for every validation round; never continue an earlier one.
 - **Plan review:** the plan is written in one session and reviewed in
-  another. The planner session never reviews its own plan.
+  another. The build session never reviews its own plan.
 - **Validation independence:** Validator is a different model family from
   Generator in the default assignment. Whatever the assignment, its
   independence comes from a separate fresh context, read-only product

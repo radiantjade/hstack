@@ -1,6 +1,6 @@
 ---
 name: pgv-setup
-description: Set or change which model does which job in PGV for a repository - the planner, the builder, the validator - and write it to pgv.md, beside the plans or at a path the user gives, where pgv-build and pgv-integrate read it. Use when the user asks to set up or configure PGV or to change its models. PGV runs without it, on the default models.
+description: Set or change which model does which job in PGV for a repository - the session that runs a build, the generator, the validator - and write it to pgv.md, beside the plans or at a path the user gives, where pgv-build and pgv-integrate read it. Use when the user asks to set up or configure PGV or to change its models. PGV runs without it, on the default models.
 ---
 
 # PGV setup
@@ -81,7 +81,7 @@ Each choice is a model with its effort (for example "Opus 5.5, xhigh"), the
 recommended one first, with a few words on why: the default of the routing
 reference, the repository's own rule where it has one, or the same or
 another family as the model whose work it checks. Offer only models this
-machine can run. A validator of the builder's family is independent only
+machine can run. A validator of the generator's family is independent only
 through its fresh context: say so in the few words of that choice.
 
 ### At the first setup: whether Git ignores the file
