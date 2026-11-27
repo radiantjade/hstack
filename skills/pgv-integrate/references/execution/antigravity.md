@@ -81,6 +81,23 @@ tool result. Save the Validator's complete JSON `response` verbatim at
 the report path. Mark checks without valid evidence `UNVERIFIED`.
 [Headless permissions and errors](https://antigravity.google/docs/cli/headless/#permissions-in-headless-mode)
 
+Record the `conversation_id` of each turn. The JSON result carries it,
+also when `status` is `ERROR` (seen for a print timeout). With
+`--output-format stream-json` the first event (`init`) carries it before
+the turn ends.
+
+**Resume an interrupted turn** (see
+[model routing](../model-routing.md#an-interrupted-turn)), from the same
+checkout, with the role's own flags and `--conversation`:
+
+```bash
+agy --sandbox --mode accept-edits --model gemini-4-neon --effort medium \
+  --conversation "$conversation_id" --output-format json -p "$resume_prompt"
+```
+
+`--resume` and `-r` are aliases of `--conversation`. `--continue` takes
+the most recent conversation; use the ID when several turns ran.
+
 ## GUI
 
 ### Build session

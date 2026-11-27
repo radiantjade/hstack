@@ -106,6 +106,26 @@ Repairer, or terminal Validator packet. Run from the assigned checkout
 with the model, effort, and access recorded in the manifest. Use the
 provider's CLI guide even when Main is running in a GUI.
 
+### An interrupted turn
+
+Record each turn's session ID as soon as the provider gives it. A turn
+is interrupted when it stops before its terminal artifact through no
+decision of its own: a lost connection, a sleeping host, a killed
+process, a time limit.
+
+1. Inspect what the turn left: its output, the working tree, and any
+   command still running on another host.
+2. Resume that same session with the provider's resume command from its
+   [CLI guide](#execution-guides). Keep the role, model, effort, checkout,
+   and permissions. Send a short instruction, not the packet again: say
+   that the turn was cut, what step 1 found, and that it finishes the
+   packet and returns its terminal artifact.
+3. Start a fresh turn only when the session cannot be resumed. Give it the
+   packet and what step 1 found.
+
+A resumed turn is the same turn. Never send a new packet through a
+resumed session, and never resume a session to cross a role boundary.
+
 ## Validator
 
 Keep product code read-only. Return complete findings and check evidence
@@ -161,6 +181,8 @@ fallbacks: none
   caller's context. Validator never reuses Generator's session or an earlier
   validation session. A Codex desktop app thread is one turn: start a new
   thread for every validation round; never continue an earlier one.
+  Resuming an [interrupted turn](#an-interrupted-turn) continues that
+  turn's own context and is not reuse.
 - **Plan review:** the plan is written in one session and reviewed in
   another. The build session never reviews its own plan.
 - **Validation independence:** Validator is a different model family from

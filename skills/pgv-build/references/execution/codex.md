@@ -30,6 +30,22 @@ codex exec -m "$model" -c "model_reasoning_effort=\"$effort\"" "$packet"
 Apply the role's permissions. If the Validator cannot write its report
 file, capture the completed report from the response and save it verbatim.
 
+Record the session ID of each turn. With `--json`, the first event
+(`thread.started`) carries it as `thread_id`, before the turn ends.
+
+**Resume an interrupted turn** (see
+[model routing](../model-routing.md#an-interrupted-turn)), from the same
+checkout and with the same model, effort, and permissions:
+
+```bash
+codex exec resume -m "$model" -c "model_reasoning_effort=\"$effort\"" \
+  "$session_id" "$resume_prompt"
+```
+
+`codex exec resume --last` takes the most recent session recorded for the
+checkout; use the ID when several turns ran there. A turn started with
+`--ephemeral` cannot be resumed. Tested with `codex-cli` 0.172.0 on macOS.
+
 ## GUI
 
 ### Build session

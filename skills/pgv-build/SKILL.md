@@ -321,6 +321,10 @@ Keep turn IDs and detailed evidence in the build records.
 - Each delegation ends with a completed artifact or blocker. Do not send
   progress pings or start duplicate owners. Material new information requires
   the turn to return or be cancelled before replacement.
+- A turn that was cut before its artifact (a lost connection, a killed
+  process) is resumed in its own session, as
+  [model routing](references/model-routing.md#an-interrupted-turn) says. Do
+  not start a second turn for the same packet while the first can be resumed.
 - Validator is always fresh-context and read-only for product code. Role
   labels in one continuous context are not independence. If isolation is
   unavailable, disclose the limitation and do not claim independence.

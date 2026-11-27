@@ -175,7 +175,11 @@ items when applicable.
   merge of the target, a rebase) means the earlier result says nothing about
   it. The target becomes the commit that passed, not one like it.
 - The Validator is always fresh and never edits the code it judges; the
-  Repairer never judges its own repair.
+  Repairer never judges its own repair. A Validator or Repairer turn that
+  was cut before its report (a lost connection, a killed process) is
+  resumed in its own session, as
+  [model routing](references/model-routing.md#an-interrupted-turn) says; that
+  continues the same turn and does not make the next round less fresh.
 - Only the files carry context between rounds, sessions and machines. Write
   them so that a reader with nothing else can act.
 - Only the user removes a requirement: waiving a check, letting in a work

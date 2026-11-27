@@ -23,15 +23,30 @@ approval required to message across permission modes.
 
 ### Generator and Validator
 
-Start a fresh non-interactive invocation for each packet.
+Start a fresh non-interactive invocation for each packet. Choose the
+session ID before the turn and record it, so that it is known even if the
+turn is cut.
 
 ```bash
-claude -p --model "$model" --effort "$effort" "$packet"
+session_id="$(uuidgen | tr 'A-Z' 'a-z')"
+claude -p --session-id "$session_id" --model "$model" --effort "$effort" "$packet"
 ```
 
 Apply the role's permissions. If the role cannot write its report file,
 capture the completed report from the response and save it verbatim.
 [Claude Code CLI reference](https://code.claude.com/docs/en/cli-reference)
+
+**Resume an interrupted turn** (see
+[model routing](../model-routing.md#an-interrupted-turn)), from the same
+checkout and with the same model, effort, and permissions:
+
+```bash
+claude -p --resume "$session_id" --model "$model" --effort "$effort" "$resume_prompt"
+```
+
+With `--output-format json` the result also carries `session_id`. A turn
+started with `--no-session-persistence` cannot be resumed. Tested with
+Claude Code 2.1.332 on macOS.
 
 ## GUI
 
