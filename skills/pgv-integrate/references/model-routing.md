@@ -4,60 +4,102 @@ This file is the same in `pgv-setup`, `pgv-build` and
 `pgv-integrate`. Its source is
 `shared/pgv/model-routing.md`; `tools/sync-pgv-shared.sh` copies it.
 
-The skill bodies are model-agnostic. **This file is the only place where
-concrete models, and the commands that start them, are named.** To change
-who does what, edit the source and run the sync script. Claude Code and
-Codex load the skills through symlinks to one checkout, so a single edit
-applies to both.
+The skill bodies are model-agnostic. Keep model choices and launch
+commands here. Edit the source and run the sync script to update the
+copies used by Claude Code and Codex.
 
 ## Roles
 
 | Role | What it does |
 |---|---|
-| Caller | The session the user asked to run `pgv-build`. It agrees the goal and the decision policy with the user, starts the build session, reviews the plan as Plan Reviewer, and passes on what the user must see or decide. It does not run the build, so it stays free for the user. |
+| Caller | The session the user asked to run `pgv-build`. It agrees the goal and decision policy, starts the build session, handles the review exchange, and relays user decisions and results. |
 | Main | Runs the workflow: starts Generator and Validator, decides what the user delegated, assembles, and reports. In `pgv-build` it is the build session. In `pgv-integrate` it is the session the user asked. |
 | Planner | Plans how the approved goal is reached and by what checks that is verified. In `pgv-build` it is the build session too: planning is the first step of what that session runs. |
-| Plan Reviewer | Separately verifies the plan that Planner wrote. In `pgv-build` it is the caller. |
+| Plan Reviewer | The caller reviews the plan in the current conversation, using the model and reasoning effort already in use. |
 | Generator | Implements the plan. In `pgv-integrate` the same assignment repairs a check that failed. |
 | Validator | Verifies the implementation, by the verification that the goal states. |
 
-## Default assignment
+## Resolve the assignment
 
-The assignment in force is the one in the repository's `pgv.md` (the file
-that `pgv-setup` writes; `records.md` says where it is found). Read it
-before recording the manifest, and follow it unless the user explicitly
-overrides a role for this run. The table below is what `pgv-setup` proposes
-to the user, and what is in force when there is no `pgv.md` or it does not
-list a role. Whatever the assignment, it sets only the model, the effort and the
-backend: the rules below hold for any of them. Pin both the model and
-reasoning effort of
-every delegated role; do not inherit a different host default silently.
+Resolve the Build session, Generator, and Validator from the first applicable source in this order.
+
+1. The user's instruction for this run, including ordinary prose in the
+   invocation or conversation before launch.
+2. The repository's saved `pgv.md` assignment. See `records.md` for its
+   location and format.
+3. The recommended default below.
+
+Apply a run override only to the roles it names. For unspecified fields,
+keep saved choices that fit the override. Infer the backend when only one
+supports the chosen model and role. Use the role's recommended compatible
+model when only the backend changes and the saved model is incompatible.
+For a new model with no explicit effort, use its recommended effort for
+the role or the backend's documented default for that model. Record the
+resolved value and pass it explicitly. Ask if a needed choice is ambiguous
+or the user's explicit combination is unavailable. Apply clear instructions
+directly and keep `pgv.md` as the saved assignment for future runs.
+
+For example, “For this build, use Neon at medium for Generator and Neon at
+xhigh for Validator” selects two `agy` turns. Resolve the build session
+separately.
+
+**Build session.** Main and Planner share a separate session on the
+caller's harness. Use a model the harness provides natively. A choice
+for Main or Planner names that session. Use the caller's current model
+and reasoning effort as the recommendation. A saved model preference
+from another harness yields to this native recommendation. If the user
+explicitly names a non-native model for this run, ask which native model
+they want.
+
+**Plan Reviewer.** Review in the current conversation with its actual
+model and reasoning effort. Record those values in the manifest when
+they are known. Pin the backend, model, and reasoning effort for the
+other roles and keep their access and verification requirements.
+
+## Recommended defaults
+
+Offer these first at setup. Use them for roles with no saved assignment or
+run override.
 
 | Role | Model | Reasoning effort | Backend and access |
 |---|---|---|---|
-| Caller and Plan Reviewer | The host session's current model | The host session's current effort | Host session (Claude Code or Codex); read-only product code, may write the goal record and its review |
-| Build session (Main and Planner) | Claude Opus 5.5 (`claude-opus-5-5`) | `xhigh` | The build session: a separate interactive session that the caller starts (below); may write the plan; full within authorized scope as Main |
+| Plan Reviewer | The caller's current model | The caller's current effort | Caller session, with read-only access to product code |
+| Build session (Main and Planner) | The caller's current native model | The caller's current effort | Separate session on the caller's harness, with Main's authorized scope |
 | Generator | Claude Opus 5.5 (`claude-opus-5-5`) | `medium` | `claude -p`, fresh context; writable scope from packet |
-| Validator | `gpt-6.2-astra` | `xhigh` | `codex exec`, or a new Codex desktop app thread when the round needs computer use or browser use (below); fresh context; read-only product code, may write validation report |
+| Validator | GPT-6.2 Astra (`gpt-6.2-astra`) | `xhigh` | `codex exec`, or a new Codex desktop app thread when the round needs computer use or browser use (below); fresh context; read-only product code, may write validation report |
 
-**The caller keeps the host session as it is.** It runs in the session the
-user invoked the skill from, with that session's model and effort. Record the
-values actually in use; do not record a model or effort the session is not
-running. The plan is reviewed by the caller, whatever its model family: what
-it brings to the review is that it knows what the user asked.
+The caller gives the plan review verdict directly to the build session.
+See [Plan Reviewer](#plan-reviewer).
 
 **In `pgv-integrate`** the host session is Main, the Validator assignment is
-the one above, and the agent that repairs a failed check takes the Generator
-assignment. There is no caller, no build session and no Plan Reviewer.
+resolved as above, and the agent that repairs a failed check takes the
+Generator assignment. There is no caller, no build session and no Plan Reviewer.
+
+## Supported choices
+
+Offer combinations confirmed on the environment where the role will run.
+The table lists options alongside the recommended defaults above.
+
+| Role | Model | Suggested effort | Backend |
+|---|---|---|---|
+| Generator | Gemini 4 Neon (`gemini-4-neon`) | `medium` | `agy` |
+| Generator | GPT-6.2 Sol (`gpt-6.2-sol`) | `high` | `codex exec` |
+| Validator for terminal checks | Gemini 4 Neon (`gemini-4-neon`) | `xhigh` | `agy` |
+| Validator for terminal checks | Claude Opus 5.5 (`claude-opus-5-5`) | `xhigh` | `claude -p` |
+
+Claude Code and Codex models can also fill those roles when the chosen
+terminal backend can meet the role's access and check requirements. For
+the build session, offer native models from the caller's harness and use
+its two-way message route. For required Codex Browser Use or Computer
+Use, select a Codex desktop Validator when resolving the run assignment.
 
 ## The build session
 
-One interactive session for one build, started by the caller with a fresh
-context. It keeps its context for the whole build, the user can open it and
-talk to it, and it exchanges messages with the caller. It is not a one-shot
-turn (`claude -p`, `codex exec`): those are for Generator and Validator,
-which take one packet and return one artifact, and which the build session
-starts.
+One interactive session for one build, started with a fresh context on
+the caller's harness. It keeps its context for the whole build, the user can open it and
+talk to it, and it exchanges messages with the caller. The build session
+starts a fresh [CLI turn](#cli-turns) for each Generator or terminal
+Validator packet.
 
 Where the host has its own function for starting a session and for messages
 between sessions, use that function, not a shell command.
@@ -86,7 +128,8 @@ between sessions, use that function, not a shell command.
 - Make the build's worktree with
   `git worktree add <path> -b <branch> <the branch the work will enter>`,
   and start the session in that folder:
-  `claude --bg --name <name> --model claude-opus-5-5 --effort xhigh --permission-mode <the caller's> "<prompt>"`.
+  `claude --bg --name "$name" --model "$model" --effort "$effort" --permission-mode "$permission_mode" "$brief"`.
+  Use the assigned model and effort and the caller's permission mode.
   It prints the session's id: keep it. A long brief goes in a file that the
   prompt names.
 - Messages go through the host's tool for a message to another session, in
@@ -105,48 +148,43 @@ build session its name; the brief tells the build session the caller's name.
 **The two sessions run in the same permission mode.** A message between
 sessions in different modes is held for the user's approval and can expire.
 
-**Codex as the host of the caller.** Codex has no tool that starts another
-thread or sends it a message; these commands do it (tried on 2026-11-26 with
-`codex-cli 0.172.0` and Claude Code 2.1.316, each command by itself, not as
-one build from start to end):
-- The caller learns its own thread id from `$CODEX_THREAD_ID` and puts it in
-  the brief.
-- A build session on a Claude model is started with the terminal command above. It sends a
-  message to the caller with
-  `codex queue --thread <the caller's id> --resume --message "<text>"`, which
-  runs a turn on that thread.
-- The caller sends a message to a build session on a Claude model that has ended its turn
-  with `claude stop <id>` followed by
-  `claude --bg --resume <id> "<text>"`. Without the stop, the second command
-  starts a copy of the session and leaves the original unanswered.
-- A build session on a Codex model is a thread of its own: its first turn is
-  `codex exec -m <model> -c model_reasoning_effort="<effort>" "<prompt>"`,
-  which prints the thread's id, and each later message to it is a
-  `codex queue` as above.
-- If the first exchange does not arrive, stop and report; do not go on
-  without the review.
+**Codex.** The caller and build session are separate Codex sessions.
+For the CLI route, the caller puts its thread ID from `$CODEX_THREAD_ID`
+in the brief. Start the build's first turn in its worktree with
+`codex exec -m "$model" -c "model_reasoning_effort=\"$effort\"" "$brief"`
+and record the returned thread ID. Either session can send a message to
+the other with `codex queue --thread "$thread_id" --resume --message "$text"`.
+Confirm the first exchange arrived before continuing to plan review.
+
+## Plan Reviewer
+
+The caller reviews the versioned plan as part of its existing
+conversation, using the approved agreements, settled user qualifications,
+and relevant sources. The caller sends its verdict and evidence to the
+build session.
 
 ## Validator
 
-**Validator is fixed** to `gpt-6.2-astra` at `xhigh` in a fresh turn,
-whichever host runs Main. When a done state or required existing behavior
-needs a user-visible end-to-end check on this computer (an app window, a
-browser flow, what a user would see or click), Validator actively uses Codex
-browser use (the `node_repl` browser service) and Codex computer use (the
-`computer-use` MCP server) to perform that check directly, instead of
-inferring the result from code or logs. If either is unavailable in that
-turn, mark the affected criteria `UNVERIFIED` with the reason; do not
-substitute a weaker check silently. Using these tools to operate apps does
-not relax Validator's read-only access to product code.
+Start a fresh Validator with the backend, model, and reasoning effort in
+the manifest. For a user-visible end-to-end check on this computer,
+Validator performs the actual app or browser interaction with Codex
+Browser Use (the `node_repl` browser service) or Codex Computer Use (the
+`computer-use` MCP server), as the criterion requires. If a required
+capability is unavailable, mark the affected criteria `UNVERIFIED` with
+the reason. Validator's read-only access to product code still applies
+while operating an app.
 
 **Validator backend for each round.**
-- A round without such a check: a fresh `codex exec` turn.
-- A round that needs Codex computer use or browser use: prefer a new thread
-  in the Codex desktop app, with the model and reasoning effort set to the
-  assignment above. Reason: from `codex exec`, Codex computer use failed to
-  find app windows (`cgWindowNotFound`, observed 2026-09-26), and a sandboxed
-  `codex exec` turn reported no available browser for browser use (observed
-  2026-09-27).
+- For terminal checks, start a fresh turn using the assigned
+  [CLI backend](#cli-turns).
+- For a round that needs Codex Computer Use or Browser Use, start a new
+  Codex desktop app thread with the assigned Codex model and effort.
+  This is the desktop backend in the default Validator assignment.
+  The terminal Codex backend has previously failed to find app windows
+  (`cgWindowNotFound`, 2026-09-26) and reported no available browser in a
+  sandboxed turn (2026-09-27). If a check discovered later requires a
+  capability the assigned backend lacks, report it and obtain an explicit
+  assignment change before using a different backend.
 - Main may start that thread itself by operating the Codex desktop app with
   the host's computer use (for example, computer use in the Claude desktop
   app): open the app, start a new thread, confirm the model and reasoning
@@ -160,18 +198,76 @@ not relax Validator's read-only access to product code.
   packet and ask the user to start the thread.
 - Record in the round's validation packet which backend ran it.
 
+## CLI turns
+
+Run from the role's assigned checkout. Pass the entire packet as
+`"$packet"` to a fresh invocation with the model and effort from the
+manifest.
+
+| Backend | Command |
+|---|---|
+| `claude -p` | `claude -p --model "$model" --effort "$effort" "$packet"` |
+| `codex exec` | `codex exec -m "$model" -c "model_reasoning_effort=\"$effort\"" "$packet"` |
+
+Apply the role's access rules when launching a CLI turn. Validator keeps
+read-only access to product code and returns full findings and check evidence.
+
+### Antigravity CLI
+
+Use Google Cloud Pay As You Go or Application Default Credentials (ADC)
+for the `agy` backend. Authenticate on the host that runs the role and
+check `agy models` before offering Neon. [Google Cloud sign-in](https://antigravity.google/docs/pay-as-you-go/#antigravity-cli) · [ADC](https://antigravity.google/docs/enterprise#setting-up-application-default-credentials-adc)
+
+Pin the base model and reasoning effort with
+`--model gemini-4-neon --effort <level>`. Neon supports `low`, `medium`,
+`high`, and `xhigh`. An effort-specific model slug from `agy models`, such
+as `gemini-4-neon-xhigh`, pins both values by itself. Use one of these
+forms per invocation. The examples use the suggested assignments above.
+The role commands were tested with `agy` 1.5.18 on macOS.
+[Antigravity headless reference](https://antigravity.google/docs/cli/headless/#select-a-model-effort-or-agent)
+
+**Generator and integration Repairer.** Run in the assigned worktree with
+the packet's writable scope and focused checks.
+
+```bash
+agy --sandbox --mode accept-edits --model gemini-4-neon --effort medium \
+  --output-format json -p "$packet"
+```
+
+**Validator.** Keep product files read-only. Ask for direct file reads,
+the exact check commands from the packet, and the complete report in the
+same turn's response. For a required terminal check, add a scoped
+`permissions.allow` rule for that command to the same per-turn
+`--settings` object.
+
+```bash
+agy --sandbox --mode plan --model gemini-4-neon --effort xhigh \
+  --settings '{"permissions":{"deny":["write_file(*)"]}}' \
+  --output-format json -p "$packet"
+```
+
+For each role, check the process exit code, JSON `status`, and stderr.
+A `SUCCESS` response can omit a requested tool result, even with empty
+stderr. Verify the actual edit or check evidence before accepting the
+result. When Validator returns a complete report, Main saves its JSON
+`response` verbatim at the packet's report path. Mark denied or missing
+checks `UNVERIFIED` when no valid evidence establishes them. [Antigravity headless permissions and errors](https://antigravity.google/docs/cli/headless/#permissions-in-headless-mode)
+
 ## Manifest
 
-The caller records this manifest before Stage 0 of `pgv-build` and puts it
-in the brief of the build session. `pgv-integrate` records it before its
-first validation round, with `main` as the host session and without the
-roles it does not have. Keep it frozen through repairs:
+In `pgv-build`, show the resolved assignments with the Stage 0 contract.
+The caller records them in the manifest and includes it in the brief
+before launching the build session. Include any role choices the user
+gives in the Stage 0 exchange. In `pgv-integrate`, record the
+applicable assignments before the first validation round, with `main` as
+the host session. The recorded assignments carry through repairs.
 
 ```text
-caller and plan-reviewer: <backend, model, reasoning effort, read-only product code>
-build session (main and planner): <backend (the build session, how it was started), model, reasoning effort, the session's name>
+caller: <actual backend, model, reasoning effort>
+plan reviewer: <caller session, its actual model and reasoning effort, read-only product code>
+build session (main and planner): <caller harness, assigned native model, reasoning effort, session name and launcher>
 generator: <backend, model, reasoning effort, writable scope>
-validator: <backend (codex exec; Codex desktop app thread for rounds needing computer/browser use), model, reasoning effort, read-only product code, fresh context, browser use / computer use when e2e checks need them>
+validator: <assigned CLI or Codex desktop backend, model, reasoning effort, read-only product code, fresh context, browser use / computer use when e2e checks need them>
 fallbacks: none
 ```
 
@@ -190,14 +286,6 @@ fallbacks: none
   independence comes from a separate fresh context, read-only product
   access, and raw evidence; where Validator and Generator are of one family,
   do not claim model diversity.
-- **CLI turns:**
-  - Generator: a fresh `claude -p --model claude-opus-5-5 --effort medium`
-    invocation per turn.
-  - Every Validator turn without computer/browser-use checks: a fresh
-    `codex exec -m gpt-6.2-astra -c model_reasoning_effort="xhigh"`
-    invocation.
-  - Validator turns that need computer use or browser use: a new Codex
-    desktop app thread with `gpt-6.2-astra` at `xhigh` (see "Validator").
 - **Unavailable assignment:** if the selected model, effort, or required
   isolation is unavailable, stop and report; never silently substitute.
 - **Repairs:** retain the assigned Generator effort during repair turns and

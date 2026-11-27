@@ -32,10 +32,10 @@ which model runs which role.
 
 Find out, without changing anything:
 
-- **The models.** `pgv.md` in the PGV folder if there is one
-  ([references/records.md](references/records.md), "Where the files are",
-  says how that folder is found), otherwise the defaults of the routing
-  reference.
+- **The models.** Resolve Validator and any Repairer as
+  [model routing](references/model-routing.md#resolve-the-assignment) says.
+  Apply the user's choices for this entry, then the saved `pgv.md`
+  assignments and recommended defaults.
 - **The target and what enters.** The target is the branch the user named,
   or `release` when a commit is about to be released. What enters is one
   work or several: the branches the user named (a pull request is its
@@ -120,11 +120,12 @@ Note the candidate's commit: every result of this round is tied to it.
 Start Validator fresh-context and read-only for product code, with the packet
 of [references/packets.md](references/packets.md): the candidate, the grouped
 items with the full text of their deferred checks, and the earlier round's
-report if there was one. It works in a checkout of exactly that commit, runs
-each item as the deferred checks say, and writes one report with a verdict
-for every item. A failed check does not end the others. Where a check runs
-(this machine, a machine it drives, a hosted runner) is whatever the
-deferred check says.
+report if there was one. It works in a checkout of exactly that commit and
+runs each item as the deferred checks say. Save its report with a verdict
+for every item using the
+[routing instructions](references/model-routing.md#validator). A failed
+check does not end the others. Where a check runs (this machine, a machine
+it drives, a hosted runner) is whatever the deferred check says.
 
 When it returns, confirm the report covers every item, then write the
 results into the entry record: the candidate's commit with its verdict, and

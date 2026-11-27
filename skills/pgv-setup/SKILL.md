@@ -1,6 +1,6 @@
 ---
 name: pgv-setup
-description: Set or change which model does which job in PGV for a repository - the session that runs a build, the generator, the validator - and write it to pgv.md in PGV's own folder (.pgv/), which PGV never commits, where pgv-build and pgv-integrate read it. Use when the user asks to set up or configure PGV or to change its models. PGV runs without it, on the default models.
+description: Record a repository's choices for PGV's native build session, generator, and validator in pgv.md under .pgv/. Use when the user asks to set up PGV or change its saved model choices. A model choice for a single build belongs to that build.
 ---
 
 # PGV setup
@@ -27,12 +27,13 @@ changes nothing on a host such as GitHub.
   files are"). If the folder you are in holds several repositories, find out
   which repository is meant before anything else.
 - **Whether `pgv.md` is already there.** If so, this run changes it: read
-  it, and ask what should change. If not, this is the first setup.
-- **Which agents this machine can run**: whether the `claude` and `codex`
-  commands exist, and the model of the session you are in. A role can only
-  be given to a model the user can actually start. When the user names a
-  model you have not seen run here, start it once with a one-line prompt
-  before writing it down, and say so if it is refused.
+  it and check which saved choices the user wants changed. If not, this is
+  the first setup.
+- **Which agents this machine can run**. Check the available backends and
+  role capabilities in [model routing](references/model-routing.md#supported-choices)
+  and identify the current session's model. When the user names a model
+  you have not seen run here, start it once with a one-line prompt before
+  recording it. Report any refusal.
 - **The repository's own rule on models**, where its instructions have one.
 
 ## 2. Ask
@@ -63,21 +64,25 @@ Never open with an explanation and trail off into a question. Further rules:
 One question for each job that is a choice. Do not ask "keep these?" over a
 table of roles: the user has to decode the table before they can answer.
 
-- The plan is checked by the session the user is talking to. That is not a
-  choice; state it as the opening of the next question.
-- "The session you talk to checks the plan. Which model should make the plan
-  and run the build? It works in a session of its own."
+- "Which model from your current harness should plan and run the build?
+  It works in a separate session."
 - "Which model should build what the plan says? It also repairs what
   validation finds."
 - "Which model should validate what was built? It checks the result the way
   the goal says."
 
-Each choice is a model with its effort (for example "Opus 5.5, xhigh"), the
-recommended one first, with a few words on why: the default of the routing
-reference, the repository's own rule where it has one, or the same or
-another family as the model whose work it checks. Offer only models this
-machine can run. A validator of the generator's family is independent only
-through its fresh context: say so in the few words of that choice.
+Use choices the user already supplied. Offer native models for the build
+session. The current conversation reviews the plan with its existing
+model and effort. For Generator and Validator, let the user name another
+supported model, reasoning effort, or backend. When the user accepts all
+recommendations, record those assignments directly.
+
+Show the model and effort for each choice. Put the recommendation first
+with a short reason based on the routing reference and repository rules.
+Include [supported choices](references/model-routing.md#supported-choices)
+when the machine and the role's checks support them. If both choices use
+the same model family, describe the fresh contexts and independent evidence
+used for validation.
 
 ### At the first setup: whether `.pgv/` is excluded from Git
 
@@ -89,11 +94,11 @@ files go.
 
 ## 3. Write
 
-Write `pgv.md` in the format of the records reference: all four roles (model,
-effort, and how it is started; the Plan Reviewer's row says that it is the
-session that calls `pgv-build`), with the default where the user kept it, and
-under "Notes" what the user said about how PGV should run here (where tests
-run, who must approve an entry into a branch).
+Write `pgv.md` in the format of the records reference with all four roles
+(model, effort, and backend). Record the current conversation as Plan
+Reviewer. Keep saved choices for roles the user leaves as they are. Use
+the recommended values they accept. Under "Notes", record
+the user's instructions about how PGV runs here.
 
 First do what the user chose, as the records reference says: the line in
 `.gitignore`, the line in the clone's `info/exclude`, or nothing, and record
@@ -112,7 +117,10 @@ Read the file back and tell the user:
 
 ## Changing it later
 
-Edit the table of `pgv.md`. It applies from the next run. Deleting the file
-returns the repository to the default models. To move the PGV folder, move
+Edit the table of `pgv.md` to change saved choices for future runs.
+For one run, the user can name role choices in the build request.
+[Model routing](references/model-routing.md#resolve-the-assignment)
+explains how those choices take precedence. Deleting `pgv.md` restores
+the recommended defaults. To move the PGV folder, move
 it and set or remove `pgv.dir` (`git config --local --unset pgv.dir` returns
 to `.pgv/`).

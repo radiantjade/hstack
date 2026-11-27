@@ -86,10 +86,12 @@ the same disk. A message that got no answer is not an agreement.
 
 ## Plan-review packet
 
-Planner sends the first three lines; the caller answers with the rest.
+The caller reviews Planner's request against the approved goal and
+relevant user qualifications from the current conversation.
 
 ```text
 Plan document: <accessible path and version, including approved agreements>
+Settled user qualifications: <relevant constraints not in the plan, or none>
 Relevant code and evidence: <support for approach, constraints, and checks>
 Review scope: <initial: Stage 2 questions | re-review: confirmed blockers, changes, and their effects>
 Prior findings and disposition: <on re-review only>
@@ -98,8 +100,7 @@ Blocking findings: <id, location, affected condition, concrete failure/unnecessa
 Exchange: <n of maximum 5 per side>
 ```
 
-The reviewer is the caller: it knows the conversation with the user, and it
-does not get Planner's private reasoning.
+The caller reviews the plan and sends its verdict and evidence to Main.
 Main adjudicates findings under Stage 2 and makes the necessary revisions.
 Record final disposition and approval in the plan. Optional observations
 remain separate from Generator obligations.
@@ -165,9 +166,8 @@ Validation report output path: <plan-slug>-validation-r<N>.md
 Mandate: read-only for product code, fresh context, evidence-based batch result per Stage 6
 ```
 
-Main provides all round context; Validator writes complete findings to the
-report because no session memory survives. These obligations do not belong
-in Planner or Generator packets. Independently inspect code and raw evidence
+Main provides all round context. Validator returns complete findings in
+the report format and Main follows model routing to persist them. Independently inspect code and raw evidence
 instead of accepting an earlier role's verdict.
 
 Required report:

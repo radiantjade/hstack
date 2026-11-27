@@ -1,6 +1,16 @@
 ---
 name: pgv-build
-description: Build one piece of software-engineering work by plan, generate, validate - a user-approved goal and decision policy, then a separate build session that runs the rest: an implementation-ready plan, which the session the user is talking to reviews, scoped generation, and independent validation of what this work itself must prove, with the validation that only means something once the work is combined with other work left as deferred checks for pgv-integrate. Use only when the user asks to run pgv-build (/pgv-build or $pgv-build), PGV, or the Plan-Generate-Validate loop, or when a session was started with the build brief of a pgv-build run. Discussing or editing this skill does not invoke the workflow.
+description: >-
+  Build one piece of software-engineering work by plan, generate, validate - a
+  user-approved goal and decision policy, then a separate build session that
+  runs the rest: an implementation-ready plan reviewed by the caller,
+  scoped generation, and independent validation of what this work
+  itself must prove, with the validation that only means something once the
+  work is combined with other work left as deferred checks for pgv-integrate.
+  Use only when the user asks to run pgv-build (/pgv-build or $pgv-build), PGV,
+  or the Plan-Generate-Validate loop, or when a session was started with the
+  build brief of a pgv-build run. Discussing or editing this skill does not
+  invoke the workflow.
 ---
 
 # PGV build
@@ -15,17 +25,14 @@ work itself must prove. `pgv-integrate` takes the works that enter a branch
 together, one or several, runs once on the merged result the validation
 their builds left, and brings the result into the branch.
 
-Roles: **Caller**, **Main**, **Planner**, **Plan Reviewer**,
-**Generator**, **Validator**. Two sessions carry the first four. The
-**caller** is the session the user asked: it agrees the goal with the user,
-starts the build session, reviews the plan as Plan Reviewer, and passes on
-what the user must see or decide. The **build session** is a separate
-interactive session that the caller starts: it runs this build from Stage 1
-to Stage 8. It is Main, and Planner too, since planning is the first step of
-what it runs. The caller therefore does not run
-the build, and stays free for the user; several builds can run at the same
-time, each in a build session of its own. Generator and Validator are
-terminal turns that the build session starts.
+Roles are **Caller**, **Main**, **Planner**, **Plan Reviewer**,
+**Generator**, and **Validator**. The **caller** is the session the user
+asked. It agrees the goal, starts the build session, reviews the plan
+in the current conversation, and relays notices and decisions. The
+**build session** is a separate interactive session on the caller's
+harness. It acts as Main and Planner from Stage 1 to Stage 8 and uses a
+native model of that harness. Main starts fresh Generator and Validator
+turns.
 
 Before assigning roles, read
 [references/model-routing.md](references/model-routing.md) and record the
@@ -40,8 +47,8 @@ for where the files of PGV are kept. None of them is committed.
 
 - **The user asked you to run this skill: you are the caller.** Do "Before
   Stage 0", Stage 0 and "Start the build session". After that your part is
-  the plan review of Stage 2 and "The caller during the build". Stages 1 and
-  3 to 8 are not yours.
+  the plan review exchange in Stage 2 and "The caller during the build".
+  Stages 1 and 3 to 8 belong to the build session.
 - **You were started with the build brief of a build: you are the build
   session, Main and Planner.** Start at Stage 1. The goal and the decision policy in your
   brief are approved: do not reopen them. Wherever a stage says to ask or
@@ -49,11 +56,12 @@ for where the files of PGV are kept. None of them is committed.
 
 ## Before Stage 0 — the models
 
-Read `pgv.md` in the PGV folder;
-[references/records.md](references/records.md), "Where the files are", says
-how that folder is found. If it exists, its
-assignment is in force. If it does not, the defaults of the routing
-reference are in force: nothing has to be set up before a build.
+Resolve the model, reasoning effort, and backend for each role as
+[model routing](references/model-routing.md#resolve-the-assignment) says.
+Use the user's natural-language choices for this build first, then
+`pgv.md` and recommended defaults.
+[Where the files are](references/records.md#where-the-files-are) explains
+how to find `pgv.md`.
 
 The files of this run are written in the PGV folder. If the user was not
 asked yet whether `.pgv/` is excluded from Git, ask the two questions of the
@@ -119,7 +127,8 @@ into main"), not this skill's terms.
 ### Approval and decision policy
 
 Use concise, plain language with nothing essential missing. Present the
-contract for explicit approval. Alongside it, ask one short question in the
+contract for explicit approval and show the resolved role assignments.
+Alongside it, ask one short question in the
 user's language: **When implementation requires a decision that the agreed
 goal and plan do not settle, how should we handle it?** Offer three choices:
 
@@ -188,7 +197,8 @@ messages reach you.
 
 A message from the build session is one of these:
 
-- **A plan to review.** Review it under Stage 2 and answer with the verdict.
+- **A plan to review.** Review it in the caller session under Stage 2 and
+  return the verdict.
 - **A decision request.** Put it to the user as it came, and return the
   user's answer in their words. Answer it yourself only where the
   conversation with the user already settled it, and say where.
@@ -233,12 +243,11 @@ on implementation evidence instead of pre-solving possible future choices.
 
 ## Stage 2 — Plan review (caller)
 
-Planner sends the caller a request for review with the path and the version
-of the plan; the plan is the file, not the message. The caller reviews it as
-Plan Reviewer. It knows the conversation with the user, which the build
-session does not: it checks the plan against what the user asked, reads the
-relevant source itself, and judges the plan as it is written, not Planner's
-reasoning. Review three questions:
+Planner sends the caller the path and version of the plan. The caller
+reviews it in the current conversation and returns the verdict. Check what
+the plan actually says against the approved goal, user constraints, and
+relevant source.
+The review covers three questions.
 
 1. What concrete defect would prevent an approved done state from passing?
 2. Does the plan violate a user constraint, execution authority, required
@@ -298,10 +307,10 @@ and from what Generator actually changed. It is finished in Stage 8.
 Start Validator fresh-context and read-only for product code. Supply the
 approved agreements, current plan, final diff and relevant files, and raw
 check evidence, never Generator's narrative or confidence. Main also supplies
-the prior report and repair summary on revalidation. Validator writes full
-findings and evidence beside the plan to `<plan-slug>-validation-r<N>.md`;
-that report survives its otherwise stateless turn. These round-context
-obligations belong to Main and Validator only.
+the prior report and repair summary on revalidation. Save Validator's full
+findings and evidence beside the plan at `<plan-slug>-validation-r<N>.md`
+using the [routing instructions](references/model-routing.md#validator).
+These round-context obligations belong to Main and Validator only.
 
 Account for every approved done state, affected required existing behavior,
 and applicable repository requirement. Independently inspect final code and
@@ -366,8 +375,8 @@ and effects; reference the plan for detail rather than repeating routine work.
 
 ## Role boundaries and turn discipline
 
-- The caller owns the agreement with the user and the plan review. It does
-  not run the build.
+- The caller owns the agreement with the user and reviews the plan before
+  implementation.
 - Main owns scope, routing, delegated decisions, assembly, communication
   with the caller, and completion claims. Roles receive self-contained,
   versioned packets, not the raw conversation transcript.

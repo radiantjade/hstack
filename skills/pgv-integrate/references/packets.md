@@ -5,8 +5,9 @@ artifact. A role never receives the conversation, and Validator never
 receives a Repairer's account of its own work. Models come from
 `model-routing.md`; the files and their formats are in `records.md`.
 
-A Validator's report is written beside the entry record, as
-`<entry-slug>-validation-r<N>.md`. Main writes the entry record and the
+Persist Validator's report beside the entry record at
+`<entry-slug>-validation-r<N>.md` using the assigned backend's routing
+instructions. Main writes the entry record and the
 status lines of the deferred files; no other role does.
 
 ## Validator packet
