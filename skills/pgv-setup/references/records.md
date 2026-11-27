@@ -94,7 +94,7 @@ Which model runs which role here.
 
 | Role | Model | Effort | Backend |
 |---|---|---|---|
-| Build session (Main and Planner) | <recommended or selected native model> | <recommended or selected effort> | Separate session on the caller's harness |
+| Build session (Main and Planner) | <recommended or selected model> | <recommended or selected effort> | <session host, provider, and surface> |
 | Plan Reviewer | Caller's current model | Caller's current effort | Caller session |
 | Generator | <model> | <effort> | <how it is started> |
 | Validator | <model> | <effort> | <how it is started> |
@@ -106,9 +106,8 @@ approve an entry into which branch, anything else>
 ```
 
 `pgv-setup` records the user's choices and the Plan Reviewer assignment.
-The build session uses a native model from the caller's harness, and
-the caller reviews the plan. See [model routing](model-routing.md#resolve-the-assignment)
-for a role choice given for a single run.
+The caller reviews the plan. See [model routing](model-routing.md#resolve-the-assignment)
+for build session compatibility and choices for a single run.
 
 ## Deferred checks: `<plan-slug>-deferred.md`
 

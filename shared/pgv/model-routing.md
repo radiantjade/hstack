@@ -34,11 +34,13 @@ resolved value and pass it explicitly. Ask if a needed choice is ambiguous
 or the user's explicit combination is unavailable. Apply clear instructions
 directly and keep `pgv.md` as the saved assignment for future runs.
 
-**Build session.** Main and Planner share one separate session on the
-caller's harness. Offer only models native to that harness, with its
-recommendation first. Use that recommendation when a saved preference
-belongs to another harness. If the user explicitly requests an
-incompatible model, ask them to choose a native model.
+**Build session.** Main and Planner share one separate session. In a
+native harness, offer that harness's models only, with its recommendation
+first. Use that recommendation when a saved preference is incompatible.
+For a caller in T3 Code, recommend the caller's provider first. The
+build thread can use another configured provider. T3 creates the thread
+and handles messaging in both directions. Follow the
+[T3 Code build session guide](execution/t3-code.md).
 
 **Plan Reviewer.** Review in the caller session with its actual model
 and reasoning effort. Record those values when known. Pin the backend,
@@ -48,7 +50,8 @@ model, and effort of the other roles.
 
 ### Build session (Main and Planner)
 
-Match the caller's harness before presenting choices.
+Match the caller's harness before presenting choices. In T3 Code use the
+caller thread's underlying provider for its recommendation.
 
 | Caller harness | Recommended native model | Reasoning effort |
 |---|---|---|
@@ -86,10 +89,10 @@ Codex desktop Validator for required Codex Browser Use or Computer Use.
 ## The build session
 
 Create one fresh, interactive session in its worktree on the caller's
-harness. The user can follow it in that harness's GUI or CLI. Keep it for
-the build and use the harness's native messaging in both directions.
-Follow the selected [execution guide](#execution-guides) for launch and
-messaging.
+session host. The user can follow it in the GUI or CLI. Keep it for the
+build and use the host's messaging in both directions. Use the
+[T3 Code guide](execution/t3-code.md) for a T3 caller and the native
+[provider guide](#execution-guides) otherwise.
 
 ## Plan Reviewer
 
@@ -117,6 +120,8 @@ the provider's [CLI guide](#execution-guides) for terminal validation.
 
 Read the guide for the assigned provider and surface. If a saved backend
 names a command, use its provider's current CLI guide.
+For a build launched from a T3 thread, use
+[T3 Code](execution/t3-code.md) for session creation and messaging.
 
 | Provider | CLI | GUI |
 |---|---|---|
@@ -142,7 +147,7 @@ the host session. The recorded assignments carry through repairs.
 ```text
 caller: <actual backend, model, reasoning effort>
 plan reviewer: <caller session, its actual model and reasoning effort, read-only product code>
-build session (main and planner): <caller harness, assigned native model, reasoning effort, session name and launcher>
+build session (main and planner): <session host, provider, model, reasoning effort, session name and launcher>
 generator: <backend, model, reasoning effort, writable scope>
 validator: <assigned CLI or Codex desktop backend, model, reasoning effort, read-only product code, fresh context, browser use / computer use when e2e checks need them>
 fallbacks: none

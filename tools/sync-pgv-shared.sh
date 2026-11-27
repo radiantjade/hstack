@@ -23,5 +23,6 @@ for skill in pgv-setup pgv-build pgv-integrate; do
   copy execution/claude-code.md "$skill"
   copy execution/codex.md "$skill"
   copy execution/antigravity.md "$skill"
+  copy execution/t3-code.md "$skill"
 done
 [ "$check" = 1 ] && echo "shared files match" || echo "shared files copied"

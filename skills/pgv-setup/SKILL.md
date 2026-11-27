@@ -23,7 +23,9 @@ still needs a choice.
 - Which model should be the Validator?
 
 List the model and reasoning effort, with the recommendation first.
-For Main and Planner, show native models from the caller's harness only.
+For Main and Planner, apply the caller's host rules in model routing.
+In T3 Code, list the caller's provider first, then other configured
+provider choices available in T3.
 Use [model routing](references/model-routing.md#recommended-defaults) for
 recommendations and [supported choices](references/model-routing.md#supported-choices)
 for alternatives. Let the user name another compatible model or effort.

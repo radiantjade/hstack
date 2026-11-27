@@ -23,7 +23,7 @@ Roles are **Caller**, **Main**, **Planner**, **Plan Reviewer**,
 asked. It agrees the goal, starts the build session, reviews the plan
 in the current conversation, and relays notices and decisions. The
 **build session** is a separate interactive session on the caller's
-harness. The user can follow it in that harness. It acts as Main and
+session host. The user can follow it there. It acts as Main and
 Planner from Stage 1 to Stage 8. Main starts fresh Generator and
 Validator turns.
 
@@ -124,17 +124,17 @@ completion criteria.
 
 ## Start the build session (caller)
 
-After goal and policy approval, start the native
+After goal and policy approval, start the
 [build session](references/model-routing.md#the-build-session) with the
 [build brief](references/review-protocol.md#build-brief).
 
-Use a Git worktree on a new branch from the work's target. Let the native
-launcher allocate it when it supports worktree isolation. Otherwise create
+Use a Git worktree on a new branch from the work's target. Let the
+session host allocate it when it supports worktree isolation. Otherwise create
 it before launch. Use the existing checkout only at the user's direction.
 Name the actual worktree and branch in the brief.
 
 Share the build session's name or link. Exchange review requests,
-decisions, and results through the harness's native messaging route.
+decisions, and results through the session host's messaging route.
 
 ## The caller during the build
 
