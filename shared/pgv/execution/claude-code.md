@@ -37,12 +37,18 @@ capture the completed report from the response and save it verbatim.
 
 ### Build session
 
-1. Use Claude Code desktop's native session tool to start a named
-   session with the assigned model and the caller's permission mode.
-   Select the assigned worktree or let the app create it from the target.
-2. If the assigned effort is higher than the caller's and the app starts
-   at the caller's effort or lower, start with a wait instruction, set
-   the effort with the session tool, and confirm the model and effort
-   before sending the brief. An effort change applies from the next turn.
-3. Exchange review requests, verdicts, and decisions through the native
-   session tools. The user answers any app approval request.
+1. Tell the user the assigned model, effort, worktree, and caller's
+   permission mode. Call `start_session` with `initiation: "offer"`
+   and the build title. In the card's **Options**, the user selects
+   those values before clicking **New session**. **Extra high** is `xhigh`.
+2. After acceptance, send the build brief with `start_session` using
+   the returned `proposal_id`, `prompt`, and `background`. The brief
+   starts the first turn. If the card cannot target the assigned worktree
+   or expose the assigned settings, give the brief to the user. They
+   open a fresh Code tab session in that worktree, select the assigned
+   settings, and send the brief as the first message.
+3. When the build transcript is available, verify `message.model` and
+   `effort` on the first assistant record. Pause the build if either
+   differs from the assignment. Exchange review requests, verdicts, and
+   decisions through the native session tools using the Desktop session
+   IDs. The user answers any app approval request.
