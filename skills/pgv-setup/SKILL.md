@@ -38,51 +38,24 @@ changes nothing on a host such as GitHub.
 
 ## 2. Ask
 
-Ask only what the user has to decide. What you can find out yourself you find
-out in step 1 and state as a fact; you do not ask it back.
+Ask one short question per role that the user still needs to choose.
 
-### How every question is built
+- "Which model should run Main and Planner?"
+- "Which model should be the Generator?"
+- "Which model should be the Validator?"
 
-Assume the user knows nothing about PGV. Build each question the same way:
+Use the role names the user already uses. Show each choice as the model
+name and reasoning effort. Put the recommended option first and mark it
+as recommended. Keep availability checks and backend details in model
+routing. Explain a specific capability only when it affects a check the
+user needs.
 
-1. **The question first**, one sentence, in their words.
-2. **Then one sentence on why you ask**: what PGV does with the answer.
-
-Never open with an explanation and trail off into a question. Further rules:
-
-- Short and concrete: who does what and when, not abstractions. Each choice
-  is explained in under a dozen words.
-- A choice says what it contains: a model with its effort, not a label you
-  coined for a group of things.
-- If the question is shown in a dialog, the user may see nothing but the
-  dialog. Do not put a table in it: one question for each job, with the
-  models as the choices.
-- Do not tell the user about your own procedure.
-
-### The questions
-
-One question for each job that is a choice. Do not ask "keep these?" over a
-table of roles: the user has to decode the table before they can answer.
-
-- "Which model from your current harness should plan and run the build?
-  It works in a separate session."
-- "Which model should build what the plan says? It also repairs what
-  validation finds."
-- "Which model should validate what was built? It checks the result the way
-  the goal says."
-
+Offer [supported choices](references/model-routing.md#supported-choices).
 Use choices the user already supplied. Offer native models for the build
 session. The current conversation reviews the plan with its existing
 model and effort. For Generator and Validator, let the user name another
 supported model, reasoning effort, or backend. When the user accepts all
 recommendations, record those assignments directly.
-
-Show the model and effort for each choice. Put the recommendation first
-with a short reason based on the routing reference and repository rules.
-Include [supported choices](references/model-routing.md#supported-choices)
-when the machine and the role's checks support them. If both choices use
-the same model family, describe the fresh contexts and independent evidence
-used for validation.
 
 ### At the first setup: whether `.pgv/` is excluded from Git
 

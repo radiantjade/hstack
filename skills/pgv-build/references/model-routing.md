@@ -84,8 +84,8 @@ The table lists options alongside the recommended defaults above.
 |---|---|---|---|
 | Generator | Gemini 4 Neon (`gemini-4-neon`) | `medium` | `agy` |
 | Generator | GPT-6.2 Sol (`gpt-6.2-sol`) | `high` | `codex exec` |
-| Validator for terminal checks | Gemini 4 Neon (`gemini-4-neon`) | `xhigh` | `agy` |
-| Validator for terminal checks | Claude Opus 5.5 (`claude-opus-5-5`) | `xhigh` | `claude -p` |
+| Validator | Gemini 4 Neon (`gemini-4-neon`) | `xhigh` | `agy` |
+| Validator | Claude Opus 5.5 (`claude-opus-5-5`) | `xhigh` | `claude -p` |
 
 Claude Code and Codex models can also fill those roles when the chosen
 terminal backend can meet the role's access and check requirements. For
