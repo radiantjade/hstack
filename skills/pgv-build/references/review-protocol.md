@@ -73,8 +73,7 @@ do not become mandatory plan sections.
 
 ## Messages between the build session and the caller
 
-The caller's user sees the first line of a message before the rest, so that
-line says by itself what the message is:
+Use this message format.
 
 ```text
 PGV <plan-slug>: <plan v<N> for review | review of plan v<N>: APPROVED/REVISE | decision needed | answer to decision <id> | generation starting | final report>

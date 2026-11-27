@@ -27,38 +27,20 @@ the user.
 
 ### Keeping `.pgv/` out of Git
 
-PGV never stages or commits a file of the PGV folder. Whether Git is also
-told to leave `.pgv/` out is the user's choice. It is asked once for a
-repository, before the first file is written there: when
-`git config --get pgv.exclude` gives nothing and Git does not ignore the
-folder yet (`git check-ignore -q .pgv/x` in the main working tree). The
-skill that is about to write asks: `pgv-setup`, or the caller of `pgv-build`
-before Stage 0.
+PGV keeps its files out of commits. Before writing its first file, ask
+about Git exclusion when `pgv.exclude` is unset and
+`git check-ignore -q .pgv/x` fails in the main worktree. Skip the
+questions if `pgv.dir` is outside the repository.
 
-They are two questions, asked one after the other, each by itself, in the
-user's language; never one question with all the answers in it.
+1. Ask “Exclude `.pgv/` from Git?” Offer Yes or No.
+2. After Yes, ask “Where should Git ignore `.pgv/`?” Offer
+   `.gitignore` or This clone only.
 
-**First question.**
-
-- "Exclude `.pgv/` from Git? PGV keeps its plans and reports in that folder."
-- **Yes**
-- **No**: Git shows the folder as untracked; PGV still commits nothing of it.
-
-**Second question, only after a yes.**
-
-- "How should `.pgv/` be excluded?"
-- **Add it to `.gitignore`**: the line `/.pgv/` in the `.gitignore` at the
-  top of the main working tree. It is a change of a file of the repository,
-  so everyone who uses the repository gets it once it is committed. Leave
-  that commit to the way the repository takes commits.
-- **Exclude it in this clone only**: the same line in
-  `$(git rev-parse --git-common-dir)/info/exclude`. Git never commits that
-  file, so no file of the repository changes and other clones are not told.
-
-Do not choose for the user, and do not write a PGV file before the answer.
-Record the answer so that it is not asked again:
-`git config --local pgv.exclude <gitignore | clone | no>`. Nothing is asked
-where `pgv.dir` names a folder outside the repository.
+For `.gitignore`, add `/.pgv/` to the root `.gitignore` in the main
+worktree. For This clone only, add the line to
+`$(git rev-parse --git-common-dir)/info/exclude`. For No, leave Git's
+ignore rules as they are. Before writing the PGV file, save the choice
+with `git config --local pgv.exclude <gitignore | clone | no>`.
 
 A turn that works in another folder (the worktree of a build, the checkout
 of a candidate) is given access to the PGV folder, to read the plan and to
@@ -112,7 +94,7 @@ Which model runs which role here.
 
 | Role | Model | Effort | Backend |
 |---|---|---|---|
-| Build session (Main and Planner) | <caller's current model or another native model> | <caller's current effort or selected effort> | Separate session on the caller's harness |
+| Build session (Main and Planner) | <recommended or selected native model> | <recommended or selected effort> | Separate session on the caller's harness |
 | Plan Reviewer | Caller's current model | Caller's current effort | Caller session |
 | Generator | <model> | <effort> | <how it is started> |
 | Validator | <model> | <effort> | <how it is started> |

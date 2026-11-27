@@ -60,32 +60,14 @@ know what another build deferred.
 
 ## 2. Say what will happen and ask
 
-Before anything runs, tell the user in their language, briefly:
+Before making the candidate, show the work, target commit, grouped checks and
+their environments, and any missing, stale, or blocked checks. Propose a
+resolution where a check cannot run as written.
 
-- which works enter, onto which commit of the target;
-- what will be validated (the grouped list, and which works asked for each
-  item), and where each check runs if the deferred check says;
-- anything that looks out of date, duplicated or impossible to carry out as
-  written, with a proposal (edit, drop, or run as is);
-- that a work with no deferred check enters without anything being run for
-  it, if there is such a work.
-
-And ask what they have to decide:
-
-- **What to do when a check fails**: have it repaired here by a fresh agent
-  and validate again; or take the work that caused it out of this entry,
-  hand its session the report, and go on with the rest; or stop and look.
-- **Whether a pull request is wanted** for what enters, and whether the
-  result is pushed. Push nothing that the user did not ask to be pushed.
-
-Use plain words. Deferred check, candidate and entry record are this skill's
-own terms and the user has not read this file: say "the validation that was
-left for this moment", "the merged commit". Show the list as a table, and
-keep each question to one short sentence.
-
-Start nothing before the answer. If the user has said beforehand that
-entries may run without asking, still state all of the above first, then go
-on.
+Ask only for undecided choices. For check failures, offer repair and
+revalidate, remove the work and continue, or stop. Resolve whether to open
+a pull request or push. Wait for any required answer, then proceed with
+the agreed entry.
 
 A check may be left out only by the user's decision. Record it as a waiver
 (who decided, when, why); never drop one silently, and never mark as passed
@@ -183,10 +165,9 @@ Then finish the records: in each deferred file, the status of every check
 that passed or was waived; in the entry record, `entered at <commit>` and
 what was repaired or taken out on the way. Delete the candidate branch.
 
-Report in the user's language: what entered and at which commit, which
-checks passed, what was waived, what was repaired and by which commits, what
-was taken out and why, and anything the user should look at. If something
-could not be validated, say exactly what and why; do not round it up.
+Report the target commit, what entered, and the check results. Include
+waivers, repair commits, and the reasons for removals or unverified
+items when applicable.
 
 ## What keeps this honest
 

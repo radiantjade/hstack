@@ -15,31 +15,25 @@ description: >-
 
 # PGV build
 
-Agree on the user's outcome and decision authority, plan enough to begin
-implementation, review for blocking defects and unnecessary work, then
-implement and independently verify the agreed result.
-
-This skill is one of three. `pgv-setup` records which model does which job.
-`pgv-build` (this skill) builds one piece of work and validates what that
-work itself must prove. `pgv-integrate` takes the works that enter a branch
-together, one or several, runs once on the merged result the validation
-their builds left, and brings the result into the branch.
+Agree on the goal and decision policy. Plan, review, implement, and verify
+one piece of work. Leave deferred checks for `pgv-integrate`.
 
 Roles are **Caller**, **Main**, **Planner**, **Plan Reviewer**,
 **Generator**, and **Validator**. The **caller** is the session the user
 asked. It agrees the goal, starts the build session, reviews the plan
 in the current conversation, and relays notices and decisions. The
 **build session** is a separate interactive session on the caller's
-harness. It acts as Main and Planner from Stage 1 to Stage 8 and uses a
-native model of that harness. Main starts fresh Generator and Validator
-turns.
+harness. The user can follow it in that harness. It acts as Main and
+Planner from Stage 1 to Stage 8. Main starts fresh Generator and
+Validator turns.
 
 Before assigning roles, read
 [references/model-routing.md](references/model-routing.md) and record the
 routing manifest. Before delegating, read
 [references/review-protocol.md](references/review-protocol.md) for packets
-and evidence formats. Concrete model assignments, and how a session is
-started and reached, live only in model routing.
+and evidence. Follow the
+[execution guide](references/model-routing.md#execution-guides) for the
+selected provider and surface.
 Before drafting the goal, read [references/records.md](references/records.md)
 for where the files of PGV are kept. None of them is committed.
 
@@ -70,67 +64,27 @@ written.
 
 ## Stage 0 — Goal and decision policy (hard gate)
 
-Draft the goal contract yourself from the existing conversation and
-repository context. The user reacts to a concrete draft; ask for missing
-context only when it prevents drafting an accurate goal.
-
-The contract contains four propositions:
-
-1. **Desired outcome** — what the user wants, in one or two sentences.
-2. **Done states** — states that together establish the desired outcome.
-3. **Quantification** — how each done state is measured.
-4. **Verification** — the method for each state and the exact value or
-   observation that counts as done.
+Draft the contract from the user request and repository. Ask for context
+only when it affects the contract. State the outcome, each done state,
+how to measure it, and the exact verification method and expected result.
 
 ### Validation scope: this run or the entry
 
-A run that validates as if its work went to production alone repeats, for
-every piece of work, the checks that only mean something once the pieces are
-together. So decide, before the contract is shown, where each check belongs.
+Assign each done state and required regression check one place. Validate
+what this work's tree can settle in this run. Defer checks that must run
+again on the combined result or moved branch, regardless of other builds'
+plans. A slow check of this work's own result stays in this run.
 
-Give every done state and every required regression check one place:
-
-- **In this run**: what this work itself makes true. Evidence from this
-  run's own tree settles it, and a failure points at this work.
-- **Deferred**: a claim about the product as a whole, which other work can
-  change: a full regression suite, the use cases walked from start to
-  finish, a comparison against the branch. `pgv-integrate` validates it when
-  the work enters a branch, once for everything that enters together.
-
-The test is one question: *if this passes on this run's tree, must it be run
-again anyway when the work is combined with other work or the branch moves?*
-If yes, running it here pays for it twice; defer it. Cost alone is not a
-reason to defer: a slow check of what this work itself claims stays in the
-run.
-
-The answer does not depend on what other work exists. Do not look for what
-other builds deferred, and do not try to find out whether a check overlaps
-with theirs: defer what the question says to defer. `pgv-integrate` reads
-the deferred checks of everything that enters together and runs what several
-of them ask for once. A work that enters alone has the same checks run for
-it alone.
-
-A deferred check names the target it is addressed to: the branch this work
-will enter, which is the branch it was taken from unless the user says
-otherwise. Address a check to a later target (another branch, or `release`)
-only when it needs something that exists only there, such as an environment
-that is brought up for a release.
-
-Show the split in the contract, each done state marked `in this run` or
-`deferred to <target>`. The user may move any deferred item into this run;
-it is then validated here and no deferred check is written for it. If the
-user says that this work will not go through `pgv-integrate`, everything
-belongs to this run. When you explain the split, use plain words in the
-user's language ("validated now" and "validated later, when this is merged
-into main"), not this skill's terms.
+Name the deferred target. Use the work's target branch, or a later
+branch or `release` when the check needs that environment. Show each
+check as running now or when it enters that target. Run checks now when
+the user asks or when the work will skip `pgv-integrate`.
 
 ### Approval and decision policy
 
-Use concise, plain language with nothing essential missing. Present the
-contract for explicit approval and show the resolved role assignments.
-Alongside it, ask one short question in the
-user's language: **When implementation requires a decision that the agreed
-goal and plan do not settle, how should we handle it?** Offer three choices:
+Present the contract and resolved role assignments for goal approval.
+For an unset decision policy, ask how to handle choices the goal and plan
+leave open. Offer these three choices.
 
 | Policy | Main may decide | Ask the user when |
 |---|---|---|
@@ -170,28 +124,17 @@ completion criteria.
 
 ## Start the build session (caller)
 
-When the goal is approved and the policy is settled, start the build
-session as the routing reference says: its model and effort, how it is
-started on this host, and how the two sessions send each other messages.
-Its first input is the build brief of the review protocol: the approved
-goal and policy record verbatim, what the conversation settled that the
-record does not carry, the repository, the PGV folder and where the work
-is made, the routing manifest, and the name under which it reaches you. The
-build session starts fresh: it knows nothing of your conversation but the
-brief.
+After goal and policy approval, start the native
+[build session](references/model-routing.md#the-build-session) with the
+[build brief](references/review-protocol.md#build-brief).
 
-**Each build is made in a working tree of its own.** Builds can run at the
-same time, and a build can be started while another is still running. Two
-builds that write in one working tree overwrite or pick up each other's
-changes, and then neither diff is the work of one build. So start the build
-session in a Git worktree of the repository, on a branch of this work, taken
-from the branch the work will enter unless the user says otherwise. Use the
-repository's own checkout only when the user says so. The brief names the
-worktree and the branch.
+Use a Git worktree on a new branch from the work's target. Let the native
+launcher allocate it when it supports worktree isolation. Otherwise create
+it before launch. Use the existing checkout only at the user's direction.
+Name the actual worktree and branch in the brief.
 
-Tell the user that the build session started, its name, and that they can
-open it. Then end your turn. You do not plan, delegate or check on it: its
-messages reach you.
+Share the build session's name or link. Exchange review requests,
+decisions, and results through the harness's native messaging route.
 
 ## The caller during the build
 
@@ -272,11 +215,9 @@ puts both positions to the user. Cap: **5 turns per
 side (10 executions total)**, a backstop, not a target. At the cap, stop and
 report the unresolved blocker and evidence.
 
-## Stage 3 — Transition notice
+## Stage 3 — Begin generation
 
-After approval, Main sends the caller a notice for the user: the agreed
-outcome, policy, plan path/version, routing manifest, and that generation is
-starting. This is a notice, not another approval gate. Later questions follow the selected policy.
+Use the approved plan and decision policy for Stage 4.
 
 ## Stage 4 — Generate
 
@@ -365,13 +306,10 @@ needed to finish it: the work must not enter the target it is addressed to
 until the check passes there, and `pgv-integrate` is what runs it. Do not
 report the deferred items as validated.
 
-Send the caller the final report, which it gives to the user. Report the
-outcome against the goal and compact evidence: changed files,
-checks and results, plan version, turn IDs, and limitations. List the
-deferred checks with the path of the deferred file and the target each is
-addressed to, and say that `pgv-integrate` runs them when the work enters.
-Separately list **unexpected decisions made under delegation**, with reasons
-and effects; reference the plan for detail rather than repeating routine work.
+Send the caller the outcome, changes, checks, and limitations. Link the
+plan and evidence. List deferred checks and their targets, and report
+material decisions made under delegation with their reasons and effects.
+Keep turn IDs and detailed evidence in the build records.
 
 ## Role boundaries and turn discipline
 

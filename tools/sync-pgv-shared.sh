@@ -12,6 +12,7 @@ copy() {
   if [ "$check" = 1 ]; then
     cmp -s "$src" "$dst" || { echo "differs: skills/$2/references/$1" >&2; exit 1; }
   else
+    mkdir -p "$(dirname "$dst")"
     cp "$src" "$dst"
   fi
 }
@@ -19,5 +20,8 @@ copy() {
 for skill in pgv-setup pgv-build pgv-integrate; do
   copy records.md "$skill"
   copy model-routing.md "$skill"
+  copy execution/claude-code.md "$skill"
+  copy execution/codex.md "$skill"
+  copy execution/antigravity.md "$skill"
 done
 [ "$check" = 1 ] && echo "shared files match" || echo "shared files copied"
