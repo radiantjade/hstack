@@ -55,7 +55,7 @@ Application Default Credentials (ADC). Check model access with `agy models`.
 Use a fresh `agy -p` invocation for each packet. Substitute the manifest's
 model and effort in the examples. For Neon, `--model gemini-4-neon --effort <level>` accepts
 `low`, `medium`, `high`, and `xhigh`. An effort-specific slug, such as
-`gemini-4-neon-high`, pins both values on its own. The examples below
+`gemini-4-neon-xhigh`, pins both values on its own. The examples below
 were tested with `agy` 1.5.18 on macOS.
 [Antigravity headless reference](https://antigravity.google/docs/cli/headless/#select-a-model-effort-or-agent)
 
@@ -69,7 +69,7 @@ agy --sandbox --mode accept-edits --model gemini-4-neon --effort high \
 **Validator**, in the assigned validation checkout:
 
 ```bash
-agy --sandbox --mode plan --model gemini-4-neon --effort high \
+agy --sandbox --mode plan --model gemini-4-neon --effort xhigh \
   --settings '{"permissions":{"deny":["write_file(*)"]}}' \
   --output-format json -p "$packet"
 ```
