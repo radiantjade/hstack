@@ -103,7 +103,7 @@ caller thread's underlying provider for its recommendation.
 |---|---|---|
 | Codex | GPT-6.2 Sol (`gpt-6.2-sol`) | `xhigh` |
 | Claude Code | Claude Opus 5.5 (`claude-opus-5-5`) | `xhigh` |
-| Antigravity CLI (`agy`) | Gemini 4 Neon (`gemini-4-neon`) | `xhigh` |
+| Antigravity CLI (`agy`) | Gemini 4 Neon (`gemini-4-neon`) | `high` |
 
 ### Other roles
 
@@ -124,9 +124,9 @@ The table lists options alongside the recommended defaults above.
 
 | Role | Model | Suggested effort | Backend |
 |---|---|---|---|
-| Generator | Gemini 4 Neon (`gemini-4-neon`) | `medium` | Antigravity CLI |
+| Generator | Gemini 4 Neon (`gemini-4-neon`) | `high` | Antigravity CLI |
 | Generator | GPT-6.2 Sol (`gpt-6.2-sol`) | `high` | Codex CLI |
-| Validator | Gemini 4 Neon (`gemini-4-neon`) | `xhigh` | Antigravity CLI |
+| Validator | Gemini 4 Neon (`gemini-4-neon`) | `high` | Antigravity CLI |
 | Validator | Claude Opus 5.5 (`claude-opus-5-5`) | `xhigh` | Claude Code CLI |
 
 Match the selected backend to the role's access and checks. Select a
