@@ -50,10 +50,11 @@ for where the files of PGV are kept. None of them is committed.
 
 ## Before Stage 0 — the models
 
-Resolve the model, reasoning effort, and backend for each role as
-[model routing](references/model-routing.md#resolve-the-assignment) says.
-Use the user's natural-language choices for this build first, then
-`pgv.md` and recommended defaults.
+Settle the role combination with the user at the start of every build, as
+[model routing](references/model-routing.md#confirm-the-combination-for-each-build)
+says. When a previous combination is saved in `pgv.md`, show its short
+summary and ask whether to use it or change it. When none is saved, ask
+for each role. Save what was settled in `pgv.md`.
 [Where the files are](references/records.md#where-the-files-are) explains
 how to find `pgv.md`.
 

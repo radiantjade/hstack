@@ -15,9 +15,8 @@ the repository arranges its branches. The user names what enters and where;
 the skill makes the commit that would result, validates it, and moves the
 target to that commit.
 
-This skill is one of three: `pgv-setup` records which model does which job,
-`pgv-build` builds one piece of work, `pgv-integrate` (this skill) brings
-what was built into a branch.
+This skill is one of two: `pgv-build` builds one piece of work, and
+`pgv-integrate` (this skill) brings what was built into a branch.
 
 You are **Main**: the agent the user asked. You start a **Validator** and,
 when a check fails, a **Repairer**, each in a fresh context; they never talk

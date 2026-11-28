@@ -16,12 +16,13 @@ Keep model choices in `shared/pgv/model-routing.md` and launch details in
 
 ## Resolve the assignment
 
-Resolve the Build session, Generator, and Validator from the first applicable source in this order.
+The starting combination for the Build session, Generator, and Validator
+comes from the first applicable source in this order.
 
 1. The user's instruction for this run, including ordinary prose in the
    invocation or conversation before launch.
-2. The repository's saved `pgv.md` assignment. See `records.md` for its
-   location and format.
+2. The combination of the last build, saved in `pgv.md`. See `records.md`
+   for its location and format.
 3. The recommended default below.
 
 Apply a run override only to the roles it names. For unspecified fields,
@@ -31,8 +32,53 @@ model when only the backend changes and the saved model is incompatible.
 For a new model with no explicit effort, use its recommended effort for
 the role or the backend's documented default for that model. Record the
 resolved value and pass it explicitly. Ask if a needed choice is ambiguous
-or the user's explicit combination is unavailable. Apply clear instructions
-directly and keep `pgv.md` as the saved assignment for future runs.
+or the user's explicit combination is unavailable.
+
+### Confirm the combination for each build
+
+The caller of `pgv-build` settles the combination with the user at the
+start of every build, before the goal. `pgv-integrate` takes the starting
+combination and asks only what is ambiguous.
+
+- **A previous combination exists** (`pgv.md`). Show its summary, with what
+  the user already said for this run applied, and ask one question: use this
+  combination, or change it? The answers are **Use it** and **Change it**.
+- **Change it.** Ask which roles change, then one short question for each
+  of those roles. Keep the others.
+- **No previous combination.** Ask one short question for each role.
+
+The summary is one line for each of the three roles the user chooses, as
+`<role> - <model> · <effort>` and nothing else, each role on a line of its
+own. Leave the Plan Reviewer out: it is the caller and not a choice. Where
+the question is shown in a dialog, the summary is part of the question: the
+user may see nothing but the dialog.
+
+```text
+Build session - Opus 5.5 · xhigh
+Generator - Opus 5.5 · medium
+Validator - GPT-6.2 Astra · xhigh
+```
+
+The questions for a role:
+
+- Which model should run the build session (Main and Planner)?
+- Which model should be the Generator?
+- Which model should be the Validator?
+
+List each choice as a model with its effort, the recommendation first. Take
+the recommendation from the defaults below and the alternatives from the
+supported choices. For a role that is being changed, list its present
+choice too, marked as the present one. The user may name
+another compatible model or effort. Do not ask about a role the user already
+named for this run.
+
+Before saving a choice that has not run in this environment, start it once
+with a one-line prompt, as its [execution guide](#execution-guides) says. If
+it is refused, say so and ask for that role again.
+
+Save the settled combination in `pgv.md`: the next build offers it as the
+previous one. Keep the Notes of `pgv.md`, and add to them what the user says
+about how PGV should run in this repository.
 
 **Build session.** Main and Planner share one separate session. In a
 native harness, offer that harness's models only, with its recommendation

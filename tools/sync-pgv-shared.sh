@@ -17,7 +17,7 @@ copy() {
   fi
 }
 
-for skill in pgv-setup pgv-build pgv-integrate; do
+for skill in pgv-build pgv-integrate; do
   copy records.md "$skill"
   copy model-routing.md "$skill"
   copy execution/claude-code.md "$skill"

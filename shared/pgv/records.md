@@ -1,10 +1,10 @@
 # PGV records
 
-This file is the same in `pgv-setup`, `pgv-build` and
+This file is the same in `pgv-build` and
 `pgv-integrate`. Its
 source is `shared/pgv/records.md`; `tools/sync-pgv-shared.sh` copies it.
 
-The three skills keep what they need to remember as files in one folder, the
+The two skills keep what they need to remember as files in one folder, the
 **PGV folder**. PGV commits none of these files. They are the working files of
 the person who runs PGV; what the repository keeps of a piece of work is its
 commits. The skills need Git and nothing else: no host such as GitHub, no
@@ -48,7 +48,7 @@ write its report.
 
 | Record | File in the PGV folder | Written by |
 |---|---|---|
-| Models | `pgv.md`. Optional: without it the defaults of `model-routing.md` are in force. | `pgv-setup` |
+| Models | `pgv.md`: the combination of the last build. Without it the build asks for each role. | `pgv-build` |
 | Plan | `<date>-<slug>.md`. One for one build, versioned inside the file. | `pgv-build` |
 | Deferred checks | `<plan-slug>-deferred.md`. One file for one build, with all the checks that build left. | `pgv-build` |
 | Entry record | `<date>-entry-<target>.md`. One for each entry of work into a target. | `pgv-integrate` |
@@ -90,7 +90,7 @@ slug.
 ```markdown
 # PGV models
 
-Which model runs which role here.
+The combination of the last build. The next build offers it.
 
 | Role | Model | Effort | Backend |
 |---|---|---|---|
@@ -105,7 +105,9 @@ Which model runs which role here.
 approve an entry into which branch, anything else>
 ```
 
-`pgv-setup` records the user's choices and the Plan Reviewer assignment.
+`pgv-build` saves the combination that the user settled for a build, and
+offers it at the next one. It keeps the Notes and adds what the user says
+about how PGV should run here.
 The caller reviews the plan. See [model routing](model-routing.md#resolve-the-assignment)
 for build session compatibility and choices for a single run.
 
